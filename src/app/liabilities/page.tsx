@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -12,27 +13,45 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-import { Trash2 } from "lucide-react"
+import { PlusCircle, Trash2 } from "lucide-react"
 
 import { liabilities as initialLiabilities } from "@/lib/data"
 import { useCurrency } from "@/hooks/use-currency"
 import { LiabilityUploader } from "@/components/liabilities/LiabilityUploader"
+import type { Liability } from "@/lib/types"
+import { AddLiabilityDialog } from "@/components/liabilities/AddLiabilityDialog"
 
 export default function LiabilitiesPage() {
   const { format } = useCurrency()
-  const [liabilities, setLiabilities] = useState(initialLiabilities)
+  const [liabilities, setLiabilities] = useState<Liability[]>(initialLiabilities)
+  const [isAddLiabilityDialogOpen, setIsAddLiabilityDialogOpen] = useState(false)
 
   const handleDelete = (id: string) => {
     setLiabilities(liabilities.filter((liability) => liability.id !== id))
+  }
+
+  const handleAddLiability = (newLiability: Omit<Liability, 'id'>) => {
+    setLiabilities([...liabilities, { ...newLiability, id: crypto.randomUUID() }])
+    setIsAddLiabilityDialogOpen(false)
   }
 
   return (
     <div className="space-y-8">
       <LiabilityUploader />
       <Card>
-        <CardHeader>
-          <CardTitle>Liability Overview</CardTitle>
-          <CardDescription>Track your installments and loans.</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Liability Overview</CardTitle>
+            <CardDescription>Track your installments and loans.</CardDescription>
+          </div>
+          <Button 
+            size="sm" 
+            className="bg-accent text-accent-foreground hover:bg-accent/90"
+            onClick={() => setIsAddLiabilityDialogOpen(true)}
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Liability
+          </Button>
         </CardHeader>
         <CardContent>
           <Table>
@@ -75,6 +94,11 @@ export default function LiabilitiesPage() {
           </Table>
         </CardContent>
       </Card>
+      <AddLiabilityDialog
+        isOpen={isAddLiabilityDialogOpen}
+        onClose={() => setIsAddLiabilityDialogOpen(false)}
+        onAddLiability={handleAddLiability}
+      />
     </div>
   )
 }
