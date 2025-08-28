@@ -52,10 +52,10 @@ const extractLiabilityDetailsFlow = ai.defineFlow(
     outputSchema: ExtractLiabilityDetailsOutputSchema,
   },
   async input => {
-    const response = await ai.generate({
-        prompt: await prompt.render(input),
+    const {output} = await ai.generate({
+        prompt: await prompt.renderText(input),
     });
     
-    return { details: response.text };
+    return { details: output! };
   }
 );
