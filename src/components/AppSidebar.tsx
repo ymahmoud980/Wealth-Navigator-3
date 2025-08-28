@@ -64,18 +64,15 @@ export function AppSidebar() {
         <SidebarMenu>
           {navItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} passHref legacyBehavior>
-                <SidebarMenuButton
-                  isActive={pathname === item.href}
-                  tooltip={{ children: item.label }}
-                  asChild
-                >
-                  <a>
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </a>
-                </SidebarMenuButton>
-              </Link>
+              <SidebarMenuButton
+                as={Link}
+                href={item.href}
+                isActive={pathname === item.href}
+                tooltip={{ children: item.label }}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
@@ -83,24 +80,16 @@ export function AppSidebar() {
       <SidebarFooter>
          <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="#" passHref>
-                <SidebarMenuButton tooltip={{ children: 'Settings' }} asChild>
-                  <a>
-                    <Settings />
-                    <span>Settings</span>
-                  </a>
-                </SidebarMenuButton>
-              </Link>
+              <SidebarMenuButton as={Link} href="#" tooltip={{ children: 'Settings' }}>
+                <Settings />
+                <span>Settings</span>
+              </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <Link href="#" passHref>
-                <SidebarMenuButton tooltip={{ children: 'Logout' }} asChild>
-                  <a>
-                    <LogOut />
-                    <span>Logout</span>
-                  </a>
-                </SidebarMenuButton>
-              </Link>
+              <SidebarMenuButton as={Link} href="#" tooltip={{ children: 'Logout' }}>
+                <LogOut />
+                <span>Logout</span>
+              </SidebarMenuButton>
             </SidebarMenuItem>
          </SidebarMenu>
       </SidebarFooter>
