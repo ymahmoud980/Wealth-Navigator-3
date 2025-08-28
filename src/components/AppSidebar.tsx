@@ -20,8 +20,11 @@ import {
   Calculator,
   LogOut,
   Settings,
+  X,
+  CircleAlert,
 } from "lucide-react";
 import { Button } from "./ui/button";
+import { useState } from "react";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: <LayoutDashboard /> },
@@ -34,6 +37,7 @@ const navItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const [showIssue, setShowIssue] = useState(true);
 
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -87,6 +91,24 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
+            {showIssue && (
+              <SidebarMenuItem>
+                <div className="flex items-center justify-between w-full text-sm font-medium text-destructive-foreground bg-destructive rounded-md p-2 group-data-[collapsible=icon]:hidden">
+                    <div className="flex items-center gap-2">
+                        <CircleAlert className="h-4 w-4" />
+                        <span>1 issue</span>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-destructive/80" onClick={() => setShowIssue(false)}>
+                        <X className="h-4 w-4" />
+                    </Button>
+                </div>
+                <div className="hidden group-data-[collapsible=icon]:block">
+                    <SidebarMenuButton tooltip={{ children: '1 issue' }} className="bg-destructive text-destructive-foreground hover:bg-destructive/80 focus:bg-destructive/80 active:bg-destructive/80">
+                        <CircleAlert />
+                    </SidebarMenuButton>
+                </div>
+              </SidebarMenuItem>
+            )}
             <SidebarMenuItem>
               <Link href="#">
                 <SidebarMenuButton tooltip={{ children: 'Logout' }}>
