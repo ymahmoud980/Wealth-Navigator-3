@@ -34,10 +34,17 @@ const prompt = ai.definePrompt({
   name: 'extractLiabilityDetailsPrompt',
   input: {schema: ExtractLiabilityDetailsInputSchema},
   output: {schema: ExtractLiabilityDetailsOutputSchema},
-  prompt: `You are an expert financial analyst. Your task is to extract liability details from uploaded documents, such as contracts and payment plans. 
+  prompt: `You are an expert financial analyst. Your task is to extract liability details from uploaded documents, such as contracts, invoices, and payment plans.
 
-  Analyze the following document and extract key details, including due dates, amounts, and interest rates related to the liability. Provide a clear and concise summary of these details.
-  Document: {{media url=documentDataUri}}`,
+Analyze the following document and extract key details. Focus on identifying:
+- The total amount of the liability.
+- The amount of each installment or payment.
+- The due dates for payments.
+- Any applicable interest rates.
+- The name of the creditor or project.
+
+Provide a clear and concise summary of these details. If the document is not a financial document or the details cannot be found, state that clearly.
+Document: {{media url=documentDataUri}}`,
 });
 
 const extractLiabilityDetailsFlow = ai.defineFlow(

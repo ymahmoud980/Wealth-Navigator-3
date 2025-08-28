@@ -80,7 +80,7 @@ export function LiabilityUploader() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col sm:flex-row items-center gap-4">
-          <Input type="file" onChange={handleFileChange} className="flex-1" accept="application/pdf,image/*"/>
+          <Input type="file" onChange={handleFileChange} className="flex-1" accept="application/pdf,image/*,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
           <Button onClick={handleUpload} disabled={isLoading || !file} className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90">
             {isLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
