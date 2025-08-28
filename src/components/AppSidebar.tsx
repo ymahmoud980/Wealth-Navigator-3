@@ -64,10 +64,8 @@ export function AppSidebar() {
         <SidebarMenu>
           {navItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} passHref>
+              <Link href={item.href}>
                 <SidebarMenuButton
-                  as="a"
-                  href={item.href}
                   isActive={pathname === item.href}
                   tooltip={{ children: item.label }}
                 >
@@ -82,16 +80,16 @@ export function AppSidebar() {
       <SidebarFooter>
          <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="#" passHref>
-                <SidebarMenuButton as="a" href="#" tooltip={{ children: 'Settings' }}>
+              <Link href="#">
+                <SidebarMenuButton tooltip={{ children: 'Settings' }}>
                   <Settings />
                   <span>Settings</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <Link href="#" passHref>
-                <SidebarMenuButton as="a" href="#" tooltip={{ children: 'Logout' }}>
+              <Link href="#">
+                <SidebarMenuButton tooltip={{ children: 'Logout' }}>
                   <LogOut />
                   <span>Logout</span>
                 </SidebarMenuButton>
