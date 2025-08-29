@@ -16,6 +16,7 @@ const defaultRates: ExchangeRates = {
   USD: 1,
   EGP: 47.5,
   KWD: 0.31,
+  TRY: 32.8,
 };
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {

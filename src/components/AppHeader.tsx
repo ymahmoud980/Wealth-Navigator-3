@@ -53,6 +53,7 @@ export function AppHeader() {
             <SelectItem value="USD">USD</SelectItem>
             <SelectItem value="EGP">EGP</SelectItem>
             <SelectItem value="KWD">KWD</SelectItem>
+            <SelectItem value="TRY">TRY</SelectItem>
           </SelectContent>
         </Select>
         <DropdownMenu>
@@ -60,7 +61,7 @@ export function AppHeader() {
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-10 w-10">
                 <AvatarImage src="https://picsum.photos/100" alt="User" data-ai-hint="profile picture" />
-                <AvatarFallback>U</AvatarFallback>
+                <AvatarFallback>YM</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>

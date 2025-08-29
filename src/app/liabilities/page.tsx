@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { PlusCircle, Trash2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 import { liabilities as initialLiabilities } from "@/lib/data"
 import { useCurrency } from "@/hooks/use-currency"
@@ -30,7 +31,7 @@ export default function LiabilitiesPage() {
     setLiabilities(liabilities.filter((liability) => liability.id !== id))
   }
 
-  const handleAddLiability = (newLiability: Omit<Liability, 'id'>) => {
+  const handleAddLiability = (newLiability: Omit<Liability, 'id' | 'dueDate'> & {dueDate: string}) => {
     setLiabilities([...liabilities, { ...newLiability, id: crypto.randomUUID() }])
     setIsAddLiabilityDialogOpen(false)
   }
@@ -59,8 +60,9 @@ export default function LiabilitiesPage() {
               <TableRow>
                 <TableHead>Project/Loan</TableHead>
                 <TableHead>Type</TableHead>
-                <TableHead>Due Date</TableHead>
+                <TableHead>Currency</TableHead>
                 <TableHead>Progress</TableHead>
+                <TableHead className="text-right">Monthly Installment</TableHead>
                 <TableHead className="text-right">Remaining Amount</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -68,19 +70,20 @@ export default function LiabilitiesPage() {
             <TableBody>
               {liabilities.map((liability) => {
                 const remaining = liability.totalAmount - liability.amountPaid
-                const progress = (liability.amountPaid / liability.totalAmount) * 100
+                const progress = liability.totalAmount > 0 ? (liability.amountPaid / liability.totalAmount) * 100 : 0
                 return (
                   <TableRow key={liability.id}>
                     <TableCell className="font-medium">{liability.name}</TableCell>
                     <TableCell>{liability.type}</TableCell>
-                    <TableCell>{new Date(liability.dueDate).toLocaleDateString('en-CA')}</TableCell>
+                    <TableCell><Badge variant="outline">{liability.currency}</Badge></TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Progress value={progress} className="w-32" />
                         <span className="text-xs text-muted-foreground">{Math.round(progress)}%</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right font-semibold">{format(remaining)}</TableCell>
+                    <TableCell className="text-right font-semibold">{format(liability.monthlyInstallment, liability.currency)}</TableCell>
+                    <TableCell className="text-right font-semibold">{liability.totalAmount > 0 ? format(remaining, liability.currency) : 'N/A'}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon" onClick={() => handleDelete(liability.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />

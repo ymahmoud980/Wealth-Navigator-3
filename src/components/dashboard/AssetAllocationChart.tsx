@@ -3,13 +3,26 @@
 import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell } from "recharts"
 import { assets } from "@/lib/data"
 import { useCurrency } from "@/hooks/use-currency"
+import type { ExchangeRates } from "@/lib/types";
+
+const rates: ExchangeRates = {
+  USD: 1,
+  EGP: 47.5,
+  KWD: 0.31,
+  TRY: 32.8,
+};
+
+const convertToUsd = (value: number, currency: keyof ExchangeRates) => {
+  return value / rates[currency];
+}
 
 const data = assets.reduce((acc, asset) => {
   const existing = acc.find(item => item.name === asset.location);
+  const valueInUsd = convertToUsd(asset.marketValue, asset.currency)
   if (existing) {
-    existing.value += asset.marketValue;
+    existing.value += valueInUsd;
   } else {
-    acc.push({ name: asset.location, value: asset.marketValue });
+    acc.push({ name: asset.location, value: valueInUsd });
   }
   return acc;
 }, [] as { name: string; value: number }[]);
@@ -28,7 +41,7 @@ export function AssetAllocationChart() {
               background: "hsl(var(--background))",
               borderColor: "hsl(var(--border))",
             }}
-            formatter={(value: number) => [format(value), "Value"]}
+            formatter={(value: number) => [format(value, "USD"), "Value"]}
           />
           <Pie
             data={data}

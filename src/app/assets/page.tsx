@@ -39,8 +39,8 @@ export default function AssetsPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Real Estate Assets</CardTitle>
-            <CardDescription>Manage and track your properties.</CardDescription>
+            <CardTitle>Financial Assets</CardTitle>
+            <CardDescription>Manage and track your properties, cash, and other assets.</CardDescription>
           </div>
           <Button 
             size="sm" 
@@ -55,9 +55,10 @@ export default function AssetsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Property Name</TableHead>
+                <TableHead>Asset Name</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead>Type</TableHead>
+                <TableHead>Currency</TableHead>
                 <TableHead className="text-right">Rental Income (Monthly)</TableHead>
                 <TableHead className="text-right">Market Value</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -73,8 +74,11 @@ export default function AssetsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>{asset.type}</TableCell>
-                  <TableCell className="text-right">{format(asset.rentalIncome)}</TableCell>
-                  <TableCell className="text-right">{format(asset.marketValue)}</TableCell>
+                   <TableCell>
+                    <Badge variant="outline">{asset.currency}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right">{format(asset.rentalIncome, asset.currency)}</TableCell>
+                  <TableCell className="text-right">{format(asset.marketValue, asset.currency)}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => handleDelete(asset.id)}>
                       <Trash2 className="h-4 w-4 text-destructive" />

@@ -21,7 +21,7 @@ export function UpcomingRents() {
     <Card>
       <CardHeader>
         <CardTitle>Upcoming Rents</CardTitle>
-        <CardDescription>Next 10 rental payments to be received.</CardDescription>
+        <CardDescription>Next rental payments to be received.</CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[200px]">
@@ -35,7 +35,7 @@ export function UpcomingRents() {
                   />
                   <div className="flex-1 grid grid-cols-3 gap-2 items-center text-sm">
                     <span className="font-medium truncate col-span-2">{rent.property}</span>
-                    <span className="font-semibold text-right text-green-600">{format(rent.amount)}</span>
+                    <span className="font-semibold text-right text-green-600">{format(rent.amount, rent.currency)}</span>
                   </div>
                 </div>
               ))

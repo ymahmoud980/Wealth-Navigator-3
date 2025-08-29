@@ -22,7 +22,7 @@ export function UpcomingPayments() {
     <Card>
       <CardHeader>
         <CardTitle>Upcoming Payments</CardTitle>
-        <CardDescription>Next 10 installments and bills due.</CardDescription>
+        <CardDescription>Next installments and bills due.</CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[200px]">
@@ -36,7 +36,7 @@ export function UpcomingPayments() {
                   />
                   <div className={cn("flex-1 grid grid-cols-3 gap-2 items-center text-sm")}>
                     <span className="font-medium truncate col-span-2">{payment.name}</span>
-                    <span className="font-semibold text-right">{format(payment.amount)}</span>
+                    <span className="font-semibold text-right">{format(payment.amount, payment.currency)}</span>
                   </div>
                 </div>
               ))
