@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { useCurrency } from "@/hooks/use-currency"
-import { calculateMetrics } from "@/lib/calculations"
+import { calculateMetrics, convert, rates } from "@/lib/calculations"
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -147,7 +147,7 @@ export default function CashFlowPage() {
                                                 <span>{h.currency}</span>
                                             </div>
                                         ) : (
-                                            <span>{format(calculateMetrics({ ...data, monthlyExpenses: { household: [h]}}, currency).totalExpenses)}</span>
+                                            <span>{format(convert(h.amount, h.currency, currency, rates))}</span>
                                         )}
                                      </div>
                                 ))}
