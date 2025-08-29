@@ -32,7 +32,7 @@ export const assets: Asset[] = [
   { id: 'CASH-KWD', name: 'Cash in KWD', location: 'Egypt', type: 'Cash', rentalIncome: 0, marketValue: 11622, currency: 'KWD' },
   { id: 'CASH-TRY', name: 'Cash in TRY', location: 'Turkey', type: 'Cash', rentalIncome: 0, marketValue: 115924, currency: 'TRY' },
   // Assuming gold price around $75/gram
-  { id: 'GOLD', name: 'Gold Bars (300g)', location: 'Egypt', type: 'Gold', rentalIncome: 0, marketValue: 300 * 75 * (1/EGP_TO_USD), currency: 'EGP' },
+  { id: 'GOLD', name: 'Gold Bars (300g)', location: 'Egypt', type: 'Gold', rentalIncome: 0, marketValue: 300 * 75, currency: 'USD' },
   { id: 'REC-Mahmoud', name: 'Receivable from Mahmoud', location: 'Egypt', type: 'Receivable', rentalIncome: 0, marketValue: 677, currency: 'KWD' },
   { id: 'RET-KOC', name: 'End of Service (KOC)', location: 'Egypt', type: 'Cash', rentalIncome: 0, marketValue: 82000, currency: 'KWD' },
 ];
@@ -43,7 +43,7 @@ export const liabilities: Liability[] = [
   { id: 'L-Nile2', name: 'Nile Dev - Commercial Unit', type: 'Real Estate', totalAmount: 0, amountPaid: 0, monthlyInstallment: 844700 / 12, currency: 'EGP', dueDate: '2030-07-01' },
   { id: 'L-Nile3', name: 'Nile Dev - Tycoon Hotel (x2)', type: 'Real Estate', totalAmount: 0, amountPaid: 0, monthlyInstallment: (1596300 * 2) / 12, currency: 'EGP', dueDate: '2030-03-01' },
   { id: 'L-Mercon', name: 'MERCON - Nurai Studio', type: 'Real Estate', totalAmount: 0, amountPaid: 0, monthlyInstallment: 542372 / 12, currency: 'EGP', dueDate: '2030-12-25' },
-  { id: 'L-TajMisr', name: 'Taj Misr - Dejoya', type: 'Real Estate', totalAmount: 0, amountPaid: 1181250, monthlyInstallment: (1181250 * 4) / 12, currency: 'EGP', dueDate: '2035-05-17' },
+  { id: 'L-TajMisr', name: 'Taj Misr - Dejoya', type: 'Real Estate', totalAmount: 0, amountPaid: 1181250, monthlyInstallment: 0, currency: 'EGP', dueDate: '2035-05-17' },
   
   // Kuwait Liabilities
   { id: 'L-Gulf1', name: 'Gulf Bank Loan 1', type: 'Loan', totalAmount: 20000, amountPaid: 2596, monthlyInstallment: 395.860, currency: 'KWD', dueDate: '2029-10-01' },
@@ -58,9 +58,10 @@ export const upcomingPaymentsData: UpcomingPayment[] = [
     { id: 'p2', name: 'Gulf Bank Loan 2', amount: 124.258, currency: 'KWD', dueDate: '2025-08-01' },
     { id: 'p3', name: 'Gulf Bank Loan 3', amount: 456.543, currency: 'KWD', dueDate: '2025-08-01' },
     { id: 'p4', name: 'KOC Loan', amount: 344, currency: 'KWD', dueDate: '2025-08-01' },
-    { id: 'p5', name: 'Taj Misr Installment', amount: 1181250, currency: 'EGP', dueDate: '2025-08-17' },
+    { id: 'p5', name: 'Taj Misr Installment', amount: 1181250 / 4, currency: 'EGP', dueDate: '2025-08-17' },
     { id: 'p6', name: 'Nile Dev - Tycoon', amount: 1596300, currency: 'EGP', dueDate: '2025-09-01' },
     { id: 'p7', name: 'MERCON - Nurai', amount: 135593, currency: 'EGP', dueDate: '2025-09-25' },
+    { id: 'p8', name: 'Nile Dev - Admin/Commercial', amount: 241500 + 844700, currency: 'EGP', dueDate: '2026-07-01' },
 ];
 
 export const upcomingRentsData: UpcomingRent[] = [
