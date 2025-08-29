@@ -1,52 +1,75 @@
 
 "use client"
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { useFinancialData } from "@/contexts/FinancialDataContext"
+import type { FinancialData } from "@/lib/types";
 
 export default function AssetsPage() {
   const { data, setData } = useFinancialData();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editableData, setEditableData] = useState<FinancialData>(JSON.parse(JSON.stringify(data)));
+
+  const handleEditClick = () => {
+    setEditableData(JSON.parse(JSON.stringify(data)));
+    setIsEditing(true);
+  };
+
+  const handleSaveClick = () => {
+    setData(editableData);
+    setIsEditing(false);
+  };
+  
+  const handleCancelClick = () => {
+    setEditableData(JSON.parse(JSON.stringify(data)));
+    setIsEditing(false);
+  };
 
   const handleRealEstateChange = (id: string, key: 'currentValue' | 'monthlyRent', value: string) => {
     const numericValue = parseFloat(value) || 0;
-    const newData = { ...data };
+    const newData = { ...editableData };
     const asset = newData.assets.realEstate.find(a => a.id === id);
     if (asset) {
       asset[key] = numericValue;
-      setData(newData);
+      setEditableData(newData);
     }
   };
 
   const handleOtherAssetChange = (id: string, value: string) => {
     const numericValue = parseFloat(value) || 0;
-    const newData = { ...data };
+    const newData = { ...editableData };
     const asset = newData.assets.otherAssets.find(a => a.id === id);
     if (asset) {
       asset.value = numericValue;
-      setData(newData);
+      setEditableData(newData);
     }
   };
   
-    const handleCashChange = (id: string, value: string) => {
+  const handleCashChange = (id: string, value: string) => {
     const numericValue = parseFloat(value) || 0;
-    const newData = { ...data };
+    const newData = { ...editableData };
     const asset = newData.assets.cash.find(a => a.id === id);
     if (asset) {
       asset.amount = numericValue;
-      setData(newData);
+      setEditableData(newData);
     }
   };
 
   const handleGoldChange = (value: string) => {
     const numericValue = parseFloat(value) || 0;
-    const newData = { ...data };
+    const newData = { ...editableData };
     newData.assets.gold[0].grams = numericValue;
-    setData(newData);
+    setEditableData(newData);
   };
+  
+  const formatNumber = (num: number) => num.toLocaleString();
 
-  const { realEstate, cash, gold, otherAssets } = data.assets;
-  const offPlanAssets = data.liabilities.installments;
+  const currentData = isEditing ? editableData : data;
+  const { realEstate, cash, gold, otherAssets } = currentData.assets;
+  const offPlanAssets = currentData.liabilities.installments;
 
   return (
     <>
@@ -54,7 +77,17 @@ export default function AssetsPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Asset Overview</CardTitle>
-            <CardDescription>Detailed breakdown of all your assets. Changes are saved automatically.</CardDescription>
+            <CardDescription>Detailed breakdown of all your assets. Click "Edit" to make changes.</CardDescription>
+          </div>
+          <div className="flex gap-2">
+            {isEditing ? (
+              <>
+                <Button onClick={handleSaveClick}>Save Changes</Button>
+                <Button variant="outline" onClick={handleCancelClick}>Cancel</Button>
+              </>
+            ) : (
+              <Button onClick={handleEditClick}>Edit</Button>
+            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-8">
@@ -69,21 +102,29 @@ export default function AssetsPage() {
                           </div>
                           <div className="space-y-1">
                             <label className="text-xs font-medium">Value ({p.currency})</label>
-                            <Input 
-                                type="number" 
-                                value={p.currentValue}
-                                onChange={(e) => handleRealEstateChange(p.id, 'currentValue', e.target.value)}
-                                className="h-8"
-                             />
+                            {isEditing ? (
+                              <Input 
+                                  type="number" 
+                                  value={p.currentValue}
+                                  onChange={(e) => handleRealEstateChange(p.id, 'currentValue', e.target.value)}
+                                  className="h-8"
+                              />
+                            ) : (
+                              <p className="font-medium">{formatNumber(p.currentValue)}</p>
+                            )}
                           </div>
                            <div className="space-y-1">
                             <label className="text-xs font-medium">Rent ({p.rentCurrency || p.currency} / {p.rentFrequency})</label>
-                             <Input 
-                                type="number" 
-                                value={p.monthlyRent}
-                                onChange={(e) => handleRealEstateChange(p.id, 'monthlyRent', e.target.value)}
-                                className="h-8"
-                             />
+                            {isEditing ? (
+                               <Input 
+                                  type="number" 
+                                  value={p.monthlyRent}
+                                  onChange={(e) => handleRealEstateChange(p.id, 'monthlyRent', e.target.value)}
+                                  className="h-8"
+                               />
+                            ) : (
+                               <p className="font-medium">{formatNumber(p.monthlyRent)}</p>
+                            )}
                           </div>
                       </div>
                   ))}
@@ -96,7 +137,7 @@ export default function AssetsPage() {
                   {offPlanAssets.map(p => (
                       <div key={p.id} className="p-4 bg-secondary rounded-lg">
                           <p className="font-bold">{p.project}</p>
-                           <p className="text-sm font-semibold mt-2">Current Asset Value: {(p.paid * 2).toLocaleString()} {p.currency}</p>
+                           <p className="text-sm font-semibold mt-2">Current Asset Value: {formatNumber(p.paid * 2)} {p.currency}</p>
                            <p className="text-xs text-muted-foreground mt-1">(Calculated as 2x amount paid)</p>
                       </div>
                   ))}
@@ -111,12 +152,16 @@ export default function AssetsPage() {
                            <p className="font-bold">Cash <span className="font-normal text-muted-foreground">- {c.location}</span></p>
                            <div className="space-y-1">
                              <label className="text-xs font-medium">Amount ({c.currency})</label>
-                             <Input 
-                                type="number" 
-                                value={c.amount}
-                                onChange={(e) => handleCashChange(c.id, e.target.value)}
-                                className="h-8"
-                              />
+                             {isEditing ? (
+                               <Input 
+                                  type="number" 
+                                  value={c.amount}
+                                  onChange={(e) => handleCashChange(c.id, e.target.value)}
+                                  className="h-8"
+                                />
+                             ) : (
+                               <p className="font-medium">{formatNumber(c.amount)}</p>
+                             )}
                            </div>
                         </div>
                     ))}
@@ -124,12 +169,16 @@ export default function AssetsPage() {
                         <p className="font-bold">Gold Bars</p>
                          <div className="space-y-1">
                              <label className="text-xs font-medium">Grams</label>
-                             <Input 
-                                type="number" 
-                                value={gold[0].grams}
-                                onChange={(e) => handleGoldChange(e.target.value)}
-                                className="h-8"
-                              />
+                             {isEditing ? (
+                               <Input 
+                                  type="number" 
+                                  value={gold[0].grams}
+                                  onChange={(e) => handleGoldChange(e.target.value)}
+                                  className="h-8"
+                                />
+                             ) : (
+                               <p className="font-medium">{formatNumber(gold[0].grams)}</p>
+                             )}
                            </div>
                     </div>
                     {otherAssets.map(o => (
@@ -137,12 +186,16 @@ export default function AssetsPage() {
                             <p className="font-bold">{o.description}</p>
                             <div className="space-y-1">
                                 <label className="text-xs font-medium">Value ({o.currency})</label>
-                                <Input 
-                                    type="number" 
-                                    value={o.value}
-                                    onChange={(e) => handleOtherAssetChange(o.id, e.target.value)}
-                                    className="h-8"
-                                />
+                                {isEditing ? (
+                                  <Input 
+                                      type="number" 
+                                      value={o.value}
+                                      onChange={(e) => handleOtherAssetChange(o.id, e.target.value)}
+                                      className="h-8"
+                                  />
+                                ) : (
+                                  <p className="font-medium">{formatNumber(o.value)}</p>
+                                )}
                             </div>
                         </div>
                     ))}

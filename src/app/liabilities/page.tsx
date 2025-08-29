@@ -1,35 +1,58 @@
 
 "use client"
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { useFinancialData } from "@/contexts/FinancialDataContext"
+import type { FinancialData } from "@/lib/types";
 
 export default function LiabilitiesPage() {
   const { data, setData } = useFinancialData();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editableData, setEditableData] = useState<FinancialData>(JSON.parse(JSON.stringify(data)));
+
+  const handleEditClick = () => {
+    setEditableData(JSON.parse(JSON.stringify(data)));
+    setIsEditing(true);
+  };
+
+  const handleSaveClick = () => {
+    setData(editableData);
+    setIsEditing(false);
+  };
+
+  const handleCancelClick = () => {
+    setEditableData(JSON.parse(JSON.stringify(data)));
+    setIsEditing(false);
+  };
 
   const handleLoanChange = (id: string, key: 'remaining' | 'monthlyPayment', value: string) => {
     const numericValue = parseFloat(value) || 0;
-    const newData = { ...data };
+    const newData = { ...editableData };
     const loan = newData.liabilities.loans.find(l => l.id === id);
     if (loan) {
       loan[key] = numericValue;
-      setData(newData);
+      setEditableData(newData);
     }
   };
 
   const handleInstallmentChange = (id: string, key: 'total' | 'paid' | 'amount', value: string) => {
     const numericValue = parseFloat(value) || 0;
-    const newData = { ...data };
+    const newData = { ...editableData };
     const installment = newData.liabilities.installments.find(i => i.id === id);
     if (installment) {
       installment[key] = numericValue;
-      setData(newData);
+      setEditableData(newData);
     }
   };
   
-  const { loans, installments } = data.liabilities;
+  const formatNumber = (num: number) => num.toLocaleString();
+
+  const currentData = isEditing ? editableData : data;
+  const { loans, installments } = currentData.liabilities;
 
   return (
     <div className="space-y-8">
@@ -37,7 +60,17 @@ export default function LiabilitiesPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Liability Overview</CardTitle>
-            <CardDescription>Track your installments and loans. Changes are saved automatically.</CardDescription>
+            <CardDescription>Track your installments and loans. Click "Edit" to make changes.</CardDescription>
+          </div>
+          <div className="flex gap-2">
+            {isEditing ? (
+              <>
+                <Button onClick={handleSaveClick}>Save Changes</Button>
+                <Button variant="outline" onClick={handleCancelClick}>Cancel</Button>
+              </>
+            ) : (
+              <Button onClick={handleEditClick}>Edit</Button>
+            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-8">
@@ -57,19 +90,19 @@ export default function LiabilitiesPage() {
                         <div className="grid grid-cols-2 text-sm gap-x-4 gap-y-2 mt-2">
                             <div>
                                 <label className="text-xs font-medium">Total ({p.currency})</label>
-                                <Input type="number" value={p.total} onChange={e => handleInstallmentChange(p.id, 'total', e.target.value)} className="h-8"/>
+                                {isEditing ? <Input type="number" value={p.total} onChange={e => handleInstallmentChange(p.id, 'total', e.target.value)} className="h-8"/> : <p className="font-medium">{formatNumber(p.total)}</p>}
                             </div>
                              <div>
                                 <label className="text-xs font-medium">Paid ({p.currency})</label>
-                                <Input type="number" value={p.paid} onChange={e => handleInstallmentChange(p.id, 'paid', e.target.value)} className="h-8"/>
+                                {isEditing ? <Input type="number" value={p.paid} onChange={e => handleInstallmentChange(p.id, 'paid', e.target.value)} className="h-8"/> : <p className="font-medium">{formatNumber(p.paid)}</p>}
                             </div>
                             <div>
                                 <p className="text-muted-foreground">Remaining</p>
-                                <p className="font-medium text-destructive">{remaining.toLocaleString()}</p>
+                                <p className="font-medium text-destructive">{formatNumber(remaining)}</p>
                             </div>
                             <div>
                                 <label className="text-xs font-medium">Next Installment ({p.currency})</label>
-                                <Input type="number" value={p.amount} onChange={e => handleInstallmentChange(p.id, 'amount', e.target.value)} className="h-8"/>
+                                {isEditing ? <Input type="number" value={p.amount} onChange={e => handleInstallmentChange(p.id, 'amount', e.target.value)} className="h-8"/> : <p className="font-medium">{formatNumber(p.amount)}</p>}
                             </div>
                             <div className="col-span-2">
                                 <p className="text-muted-foreground">Next Due Date</p>
@@ -97,11 +130,11 @@ export default function LiabilitiesPage() {
                          <div className="grid grid-cols-2 text-sm gap-2 mt-2">
                              <div>
                                 <label className="text-xs font-medium">Remaining ({l.currency})</label>
-                                <Input type="number" value={l.remaining} onChange={e => handleLoanChange(l.id, 'remaining', e.target.value)} className="h-8"/>
+                                {isEditing ? <Input type="number" value={l.remaining} onChange={e => handleLoanChange(l.id, 'remaining', e.target.value)} className="h-8"/> : <p className="font-medium">{formatNumber(l.remaining)}</p>}
                             </div>
                              <div>
                                 <label className="text-xs font-medium">Monthly Payment ({l.currency})</label>
-                                <Input type="number" value={l.monthlyPayment} onChange={e => handleLoanChange(l.id, 'monthlyPayment', e.target.value)} className="h-8"/>
+                                {isEditing ? <Input type="number" value={l.monthlyPayment} onChange={e => handleLoanChange(l.id, 'monthlyPayment', e.target.value)} className="h-8"/> : <p className="font-medium">{l.monthlyPayment.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</p>}
                             </div>
                         </div>
                     </div>)

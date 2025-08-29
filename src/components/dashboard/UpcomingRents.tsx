@@ -1,7 +1,6 @@
 
 "use client";
 
-import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCurrency } from '@/hooks/use-currency';
@@ -9,19 +8,28 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import type { RealEstateAsset } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { useFinancialData } from '@/contexts/FinancialDataContext';
 
 interface UpcomingRentsProps {
     rents: RealEstateAsset[];
 }
 
 export function UpcomingRents({ rents: initialRents }: UpcomingRentsProps) {
-  const [rents, setRents] = useState(initialRents.filter(r => r.monthlyRent > 0).sort((a,b) => new Date(a.nextRentDueDate).getTime() - new Date(b.nextRentDueDate).getTime()));
-  const { format: formatCurrency } = useCurrency();
+  const { data, setData } = useFinancialData();
 
   const handleCheckChange = (id: string) => {
-    // In a real app, this would trigger a database update.
-    // For now, we'll just remove it from the list.
-    setRents(rents.filter(r => r.id !== id));
+    const newData = JSON.parse(JSON.stringify(data));
+    const property = newData.assets.realEstate.find((r: RealEstateAsset) => r.id === id);
+    if (property) {
+      const currentDueDate = new Date(property.nextRentDueDate);
+      if (property.rentFrequency === 'monthly') {
+          currentDueDate.setMonth(currentDueDate.getMonth() + 1);
+      } else if (property.rentFrequency === 'semi-annual') {
+          currentDueDate.setMonth(currentDueDate.getMonth() + 6);
+      }
+      property.nextRentDueDate = currentDueDate.toISOString().split('T')[0];
+      setData(newData);
+    }
   };
   
    const getStatus = (dueDate: string) => {
@@ -33,6 +41,8 @@ export function UpcomingRents({ rents: initialRents }: UpcomingRentsProps) {
       if (diffDays <= 7) return { className: 'text-amber-600', text: `Due in ${diffDays} days` };
       return { className: 'text-gray-500', text: `Due in ${diffDays} days` };
   }
+  
+  const sortedRents = [...initialRents].filter(r => r.monthlyRent > 0).sort((a,b) => new Date(a.nextRentDueDate).getTime() - new Date(b.nextRentDueDate).getTime());
 
   return (
     <Card>
@@ -43,8 +53,8 @@ export function UpcomingRents({ rents: initialRents }: UpcomingRentsProps) {
       <CardContent>
         <ScrollArea className="h-[200px]">
           <div className="space-y-4">
-            {rents.length > 0 ? (
-              rents.map((rent) => {
+            {sortedRents.length > 0 ? (
+              sortedRents.map((rent) => {
                   const status = getStatus(rent.nextRentDueDate);
                   return (
                     <div key={rent.id} className="flex items-center gap-4">
