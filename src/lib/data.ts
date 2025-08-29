@@ -73,8 +73,6 @@ export const upcomingRentsData: UpcomingRent[] = [
 
 export const cashFlowItems: CashFlowItem[] = [
     { name: 'Salary', amount: 4000, currency: 'KWD', type: 'Income', category: 'Salary'},
-    // Rental income will be calculated dynamically
     { name: 'Household Expenses (Egypt)', amount: 80000, currency: 'EGP', type: 'Expense', category: 'Household'},
     { name: 'Household Expenses (Kuwait)', amount: 350, currency: 'KWD', type: 'Expense', category: 'Household'},
-    // Installments will be calculated dynamically
 ];
