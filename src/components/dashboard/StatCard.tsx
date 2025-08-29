@@ -1,18 +1,18 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCurrency } from "@/hooks/use-currency";
 import type { ReactNode } from "react";
-import type { Currency } from "@/lib/types";
 
 interface StatCardProps {
   title: string;
   value: number;
   icon: ReactNode;
-  fromCurrency?: Currency;
+  isCurrency?: boolean;
 }
 
-export function StatCard({ title, value, icon, fromCurrency = 'USD' }: StatCardProps) {
+export function StatCard({ title, value, icon, isCurrency = false }: StatCardProps) {
   const { format } = useCurrency();
 
   return (
@@ -22,7 +22,7 @@ export function StatCard({ title, value, icon, fromCurrency = 'USD' }: StatCardP
         {icon}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{format(value, fromCurrency)}</div>
+        <div className="text-2xl font-bold">{isCurrency ? format(value) : value}</div>
       </CardContent>
     </Card>
   );

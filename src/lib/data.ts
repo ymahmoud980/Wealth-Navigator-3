@@ -1,79 +1,60 @@
-import type { Asset, Liability, UpcomingPayment, UpcomingRent, CashFlowItem } from './types';
 
-// Exchange Rates to USD for internal calculations
-const EGP_TO_USD = 1 / 47.5;
-const KWD_TO_USD = 1 / 0.31;
-const TRY_TO_USD = 1 / 32.8; // Approx.
+import type { FinancialData } from './types';
 
-export const assets: Asset[] = [
-  // Egypt Assets (Values in EGP)
-  { id: 'EGY-A1', name: 'Gardenia Bldg - G-Floor', location: 'Egypt', type: 'Apartment', rentalIncome: 8500, marketValue: 5000000, currency: 'EGP' },
-  { id: 'EGY-A2', name: 'Gardenia Bldg - 1st Floor', location: 'Egypt', type: 'Apartment', rentalIncome: 0, marketValue: 5000000, currency: 'EGP' },
-  { id: 'EGY-A3', name: 'Gardenia Bldg - 2nd Floor', location: 'Egypt', type: 'Apartment', rentalIncome: 11000, marketValue: 5000000, currency: 'EGP' },
-  { id: 'EGY-A4', name: 'Gardenia Bldg - 3rd Floor', location: 'Egypt', type: 'Apartment', rentalIncome: 10000, marketValue: 5000000, currency: 'EGP' },
-  { id: 'EGY-A5', name: 'Gardenia Bldg - 4th Floor Apt 1', location: 'Egypt', type: 'Apartment', rentalIncome: 8500, marketValue: 3000000, currency: 'EGP' },
-  { id: 'EGY-A6', name: 'Gardenia Bldg - 4th Floor Apt 2', location: 'Egypt', type: 'Apartment', rentalIncome: 8500, marketValue: 3000000, currency: 'EGP' },
-  { id: 'EGY-A7', name: 'Gardenia Bldg - Basement', location: 'Egypt', type: 'Basement', rentalIncome: 0, marketValue: 4000000, currency: 'EGP' },
-  { id: 'EGY-A8', name: 'Lotus Area Apartment', location: 'Egypt', type: 'Apartment', rentalIncome: 11000, marketValue: 6000000, currency: 'EGP' },
-  { id: 'EGY-A9', name: 'Enppi Compound Apartment', location: 'Egypt', type: 'Apartment', rentalIncome: 9000, marketValue: 3500000, currency: 'EGP' },
-  { id: 'EGY-A10', name: 'Land in Belqas', location: 'Egypt', type: 'Land', rentalIncome: 0, marketValue: 3000000, currency: 'EGP' },
-  { id: 'EGY-A11', name: 'Miami Apartment', location: 'Egypt', type: 'Apartment', rentalIncome: 8000, marketValue: 3000000, currency: 'EGP' },
-  { id: 'EGY-A12', name: 'City Light Apt 1', location: 'Egypt', type: 'Apartment', rentalIncome: 6000, marketValue: 2270000, currency: 'EGP' },
-  { id: 'EGY-A13', name: 'City Light Apt 2', location: 'Egypt', type: 'Apartment', rentalIncome: 6000, marketValue: 1650000, currency: 'EGP' },
-
-  // Turkey Assets
-  { id: 'TUR-A1', name: 'Neurol Park Apt', location: 'Turkey', type: 'Apartment', rentalIncome: 23000, marketValue: 175000 * (1/TRY_TO_USD), currency: 'TRY' },
-  { id: 'TUR-A2', name: 'Adres Atakent Apt', location: 'Turkey', type: 'Apartment', rentalIncome: 29000, marketValue: 175000 * (1/TRY_TO_USD), currency: 'TRY' },
-  { id: 'TUR-A3', name: 'Innovia Apt 1', location: 'Turkey', type: 'Apartment', rentalIncome: 13000, marketValue: 95000 * (1/TRY_TO_USD), currency: 'TRY' },
-  { id: 'TUR-A4', name: 'Innovia Apt 2', location: 'Turkey', type: 'Apartment', rentalIncome: 20000, marketValue: 60000 * (1/TRY_TO_USD), currency: 'TRY' },
-
-  // Cash and Other Assets
-  { id: 'CASH-EGP', name: 'Cash in EGP', location: 'Egypt', type: 'Cash', rentalIncome: 0, marketValue: 2323596, currency: 'EGP' },
-  { id: 'CASH-KWD', name: 'Cash in KWD', location: 'Egypt', type: 'Cash', rentalIncome: 0, marketValue: 11622, currency: 'KWD' },
-  { id: 'CASH-TRY', name: 'Cash in TRY', location: 'Turkey', type: 'Cash', rentalIncome: 0, marketValue: 115924, currency: 'TRY' },
-  // Assuming gold price around $75/gram
-  { id: 'GOLD', name: 'Gold Bars (300g)', location: 'Egypt', type: 'Gold', rentalIncome: 0, marketValue: 300 * 75, currency: 'USD' },
-  { id: 'REC-Mahmoud', name: 'Receivable from Mahmoud', location: 'Egypt', type: 'Receivable', rentalIncome: 0, marketValue: 677, currency: 'KWD' },
-  { id: 'RET-KOC', name: 'End of Service (KOC)', location: 'Egypt', type: 'Cash', rentalIncome: 0, marketValue: 82000, currency: 'KWD' },
-];
-
-export const liabilities: Liability[] = [
-  // Egypt Liabilities
-  { id: 'L-Nile1', name: 'Nile Dev - Admin Unit', type: 'Real Estate', totalAmount: 0, amountPaid: 0, monthlyInstallment: 241500 / 12, currency: 'EGP', dueDate: '2030-07-01' },
-  { id: 'L-Nile2', name: 'Nile Dev - Commercial Unit', type: 'Real Estate', totalAmount: 0, amountPaid: 0, monthlyInstallment: 844700 / 12, currency: 'EGP', dueDate: '2030-07-01' },
-  { id: 'L-Nile3', name: 'Nile Dev - Tycoon Hotel (x2)', type: 'Real Estate', totalAmount: 0, amountPaid: 0, monthlyInstallment: (1596300 * 2) / 12, currency: 'EGP', dueDate: '2030-03-01' },
-  { id: 'L-Mercon', name: 'MERCON - Nurai Studio', type: 'Real Estate', totalAmount: 0, amountPaid: 0, monthlyInstallment: 542372 / 12, currency: 'EGP', dueDate: '2030-12-25' },
-  { id: 'L-TajMisr', name: 'Taj Misr - Dejoya', type: 'Real Estate', totalAmount: 0, amountPaid: 1181250, monthlyInstallment: 0, currency: 'EGP', dueDate: '2035-05-17' },
-  
-  // Kuwait Liabilities
-  { id: 'L-Gulf1', name: 'Gulf Bank Loan 1', type: 'Loan', totalAmount: 20000, amountPaid: 2596, monthlyInstallment: 395.860, currency: 'KWD', dueDate: '2029-10-01' },
-  { id: 'L-Gulf2', name: 'Gulf Bank Loan 2', type: 'Loan', totalAmount: 6238, amountPaid: 1268, monthlyInstallment: 124.258, currency: 'KWD', dueDate: '2028-05-01' },
-  { id: 'L-Gulf3', name: 'Gulf Bank Loan 3', type: 'Loan', totalAmount: 23000, amountPaid: 602, monthlyInstallment: 456.543, currency: 'KWD', dueDate: '2029-09-01' },
-  { id: 'L-KOC', name: 'KOC Loan', type: 'Loan', totalAmount: 12396, amountPaid: 11696, monthlyInstallment: 344, currency: 'KWD', dueDate: '2025-08-01' },
-];
-
-
-export const upcomingPaymentsData: UpcomingPayment[] = [
-    { id: 'p1', name: 'Gulf Bank Loan 1', amount: 395.860, currency: 'KWD', dueDate: '2025-08-01' },
-    { id: 'p2', name: 'Gulf Bank Loan 2', amount: 124.258, currency: 'KWD', dueDate: '2025-08-01' },
-    { id: 'p3', name: 'Gulf Bank Loan 3', amount: 456.543, currency: 'KWD', dueDate: '2025-08-01' },
-    { id: 'p4', name: 'KOC Loan', amount: 344, currency: 'KWD', dueDate: '2025-08-01' },
-    { id: 'p5', name: 'Taj Misr Installment', amount: 1181250 / 4, currency: 'EGP', dueDate: '2025-08-17' },
-    { id: 'p6', name: 'Nile Dev - Tycoon', amount: 1596300, currency: 'EGP', dueDate: '2025-09-01' },
-    { id: 'p7', name: 'MERCON - Nurai', amount: 135593, currency: 'EGP', dueDate: '2025-09-25' },
-    { id: 'p8', name: 'Nile Dev - Admin/Commercial', amount: 241500 + 844700, currency: 'EGP', dueDate: '2026-07-01' },
-];
-
-export const upcomingRentsData: UpcomingRent[] = [
-    { id: 'r1', property: 'Lotus Area Apartment', amount: 11000, currency: 'EGP', dueDate: '2025-08-01' },
-    { id: 'r2', property: 'Gardenia Bldg - G-Floor', amount: 8500, currency: 'EGP', dueDate: '2025-09-01' },
-    { id: 'r3', property: 'Gardenia Bldg - 3rd Floor', amount: 10000, currency: 'EGP', dueDate: '2025-10-01' },
-    { id: 'r4', property: 'Gardenia Bldg - 2nd Floor', amount: 11000, currency: 'EGP', dueDate: '2025-11-01' },
-    { id: 'r5', property: 'Enppi Compound Apartment', amount: 9000, currency: 'EGP', dueDate: '2025-11-01' },
-];
-
-export const cashFlowItems: CashFlowItem[] = [
-    { name: 'Salary', amount: 4000, currency: 'KWD', type: 'Income', category: 'Salary'},
-    { name: 'Household Expenses (Egypt)', amount: 80000, currency: 'EGP', type: 'Expense', category: 'Household'},
-    { name: 'Household Expenses (Kuwait)', amount: 350, currency: 'KWD', type: 'Expense', category: 'Household'},
-];
+export const initialFinancialData: FinancialData = {
+    assets: {
+        realEstate: [
+            { id: 're1-apt1', name: "Building Apt 1 (GF)", location: "New Cairo", currentValue: 5000000, currency: "EGP", monthlyRent: 8500, rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-09-01' },
+            { id: 're1-apt2', name: "Building Apt 2 (1F)", location: "New Cairo", currentValue: 5000000, currency: "EGP", monthlyRent: 0, rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-09-01' },
+            { id: 're1-apt3', name: "Building Apt 3 (2F)", location: "New Cairo", currentValue: 5000000, currency: "EGP", monthlyRent: 11000, rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-11-01' },
+            { id: 're1-apt4', name: "Building Apt 4 (3F)", location: "New Cairo", currentValue: 5000000, currency: "EGP", monthlyRent: 10000, rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-10-01' },
+            { id: 're1-apt5', name: "Building Apt 5 (4F-1)", location: "New Cairo", currentValue: 3000000, currency: "EGP", monthlyRent: 8500, rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-05-01' },
+            { id: 're1-apt6', name: "Building Apt 6 (4F-2)", location: "New Cairo", currentValue: 3000000, currency: "EGP", monthlyRent: 8500, rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-05-01' },
+            { id: 're1-base', name: "Building Basement", location: "New Cairo", currentValue: 4000000, currency: "EGP", monthlyRent: 0, rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-09-01' },
+            { id: 're2', name: "Lotus Apt.", location: "New Cairo", currentValue: 6000000, currency: "EGP", monthlyRent: 11000, rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-08-01' },
+            { id: 're3', name: "Enppi Apt.", location: "New Cairo", currentValue: 3500000, currency: "EGP", monthlyRent: 9000, rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-11-01' },
+            { id: 're4', name: "Miami Apt.", location: "Alexandria", currentValue: 3000000, currency: "EGP", monthlyRent: 8000, rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-09-01' },
+            { id: 're5', name: "City Light Apt. 1", location: "Alexandria", currentValue: 2270000, currency: "EGP", monthlyRent: 6000, rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-09-01' },
+            { id: 're6', name: "City Light Apt. 2", location: "Alexandria", currentValue: 1650000, currency: "EGP", monthlyRent: 6000, rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-09-01' },
+            { id: 're7', name: "Land in Belqas", location: "Belqas", currentValue: 3000000, currency: "EGP", monthlyRent: 0, rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-09-01' },
+            { id: 're8', name: "Neurol Park Apt.", location: "Turkey", currentValue: 154000, currency: "USD", monthlyRent: 138000, rentCurrency: "TRY", rentDueDay: 1, rentFrequency: 'semi-annual', nextRentDueDate: '2026-01-01'},
+            { id: 're9', name: "Adres Atakent Apt.", location: "Turkey", currentValue: 196000, currency: "USD", monthlyRent: 29000, rentCurrency: "TRY", rentDueDay: 8, rentFrequency: 'monthly', nextRentDueDate: '2025-08-08'},
+            { id: 're10', name: "Innovia Apt. 1 (Mr. Ali)", location: "Turkey", currentValue: 95000, currency: "USD", monthlyRent: 13000, rentCurrency: "TRY", rentDueDay: 20, rentFrequency: 'monthly', nextRentDueDate: '2025-08-20'},
+            { id: 're11', name: "Innovia Apt. 2", location: "Turkey", currentValue: 60000, currency: "USD", monthlyRent: 20000, rentCurrency: "TRY", rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-09-01'},
+        ],
+        cash: [
+            { id: 'c1', location: "Egypt", amount: 2323596, currency: "EGP" },
+            { id: 'c2', location: "Kuwait", amount: 11622, currency: "KWD" },
+            { id: 'c3', location: "Turkey", amount: 115924, currency: "TRY" },
+        ],
+        gold: [ { id: 'g1', description: "Gold Bars", grams: 300 } ],
+        otherAssets: [
+            { id: 'oa1', description: "End of Service Allowance (KOC)", value: 82000, currency: "KWD" },
+            { id: 'oa2', description: "Loan to Mahmoud (Receivable)", value: 677, currency: "KWD" }
+        ],
+        salary: { id: 's1', amount: 4000, currency: "KWD" }
+    },
+    liabilities: {
+        loans: [
+            { id: 'l1', lender: "Gulf Bank", initial: 20000, remaining: 17404, currency: "KWD", monthlyPayment: 395.860, finalPayment: "2029-10-01" },
+            { id: 'l2', lender: "Gulf Bank", initial: 6238, remaining: 4970, currency: "KWD", monthlyPayment: 124.258, finalPayment: "2029-05-01" },
+            { id: 'l3', lender: "Gulf Bank", initial: 23000, remaining: 22398, currency: "KWD", monthlyPayment: 456.543, finalPayment: "2030-05-01" },
+            { id: 'l4', lender: "KOC Company", initial: 12396, remaining: 700, currency: "KWD", monthlyPayment: 344, finalPayment: "2025-10-22" },
+        ],
+        installments: [
+            { id: 'i1', project: "Nile Admin (A4719)", developer: "Nile", total: 2414450, paid: 1207390, currency: "EGP", nextDueDate: "2026-07-01", amount: 241500, frequency: "Annual" },
+            { id: 'i2', project: "Nile Commercial (Co-A1050)", developer: "Nile", total: 8446984, paid: 4223497, currency: "EGP", nextDueDate: "2026-07-01", amount: 844700, frequency: "Annual" },
+            { id: 'i3', project: "Tycoon H2222", developer: "Nile", total: 9487611, paid: 4053961, currency: "EGP", nextDueDate: "2025-09-01", amount: 776300, frequency: "Semi-Annual" },
+            { id: 'i4', project: "Tycoon H2203", developer: "Nile", total: 10022052, paid: 4282205, currency: "EGP", nextDueDate: "2025-09-01", amount: 820000, frequency: "Semi-Annual" },
+            { id: 'i5', project: "Nurai (NUI-11A1-23)", developer: "MERCON", total: 4334550, paid: 681640, currency: "EGP", nextDueDate: "2025-09-25", amount: 135593, frequency: "Quarterly" },
+            { id: 'i6', project: "Dejoya Primero (S1/S-24)", developer: "Taj Misr", total: 7875000, paid: 1181250, currency: "EGP", nextDueDate: "2025-08-17", amount: 157500, frequency: "Quarterly" },
+        ]
+    },
+    monthlyExpenses: {
+        household: [
+            { id: 'he1', description: "Egypt Household", amount: 80000, currency: "EGP" },
+            { id: 'he2', description: "Kuwait Household", amount: 350, currency: "KWD" }
+        ]
+    },
+    lastUpdated: null
+};

@@ -2,181 +2,75 @@
 "use client"
 
 import { useState } from "react"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { Button } from "@/components/ui/button"
-import { PlusCircle, Trash2, Edit, Save } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 
-import { liabilities as initialLiabilities } from "@/lib/data"
+import { initialFinancialData } from "@/lib/data"
 import { useCurrency } from "@/hooks/use-currency"
-import { LiabilityUploader } from "@/components/liabilities/LiabilityUploader"
-import type { Liability, Currency } from "@/lib/types"
-import { AddLiabilityDialog } from "@/components/liabilities/AddLiabilityDialog"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import type { FinancialData } from "@/lib/types"
 
 export default function LiabilitiesPage() {
   const { format } = useCurrency()
-  const [liabilities, setLiabilities] = useState<Liability[]>(initialLiabilities)
-  const [isAddLiabilityDialogOpen, setIsAddLiabilityDialogOpen] = useState(false)
-  const [editingLiabilityId, setEditingLiabilityId] = useState<string | null>(null)
-  const [editedLiabilities, setEditedLiabilities] = useState<Record<string, Liability>>({})
+  const [data, setData] = useState<FinancialData>(initialFinancialData)
 
-  const handleEdit = (liability: Liability) => {
-    setEditingLiabilityId(liability.id)
-    setEditedLiabilities(prev => ({ ...prev, [liability.id]: { ...liability } }))
-  }
-
-  const handleSave = (id: string) => {
-    setLiabilities(prevLiabilities => prevLiabilities.map(liability => liability.id === id ? editedLiabilities[id] : liability))
-    setEditingLiabilityId(null)
-    const newEditedLiabilities = { ...editedLiabilities }
-    delete newEditedLiabilities[id]
-    setEditedLiabilities(newEditedLiabilities)
-  }
-  
-  const handleEditChange = (id: string, field: keyof Liability, value: any) => {
-    setEditedLiabilities(prev => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        [field]: value,
-      },
-    }))
-  }
-
-  const handleDelete = (id: string) => {
-    setLiabilities(liabilities.filter((liability) => liability.id !== id))
-  }
-
-  const handleAddLiability = (newLiability: Omit<Liability, 'id' | 'dueDate'> & {dueDate: string}) => {
-    setLiabilities([...liabilities, { ...newLiability, id: crypto.randomUUID() }])
-    setIsAddLiabilityDialogOpen(false)
-  }
-  
-  const isEditing = (id: string) => editingLiabilityId === id;
+  const { loans, installments } = data.liabilities;
 
   return (
     <div className="space-y-8">
-      <LiabilityUploader />
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Liability Overview</CardTitle>
-            <CardDescription>Track your installments and loans.</CardDescription>
-          </div>
-          <Button
-            size="sm"
-            className="bg-accent text-accent-foreground hover:bg-accent/90"
-            onClick={() => setIsAddLiabilityDialogOpen(true)}
-          >
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Liability
-          </Button>
+        <CardHeader>
+          <CardTitle>Liability Overview</CardTitle>
+          <CardDescription>Track your installments and loans.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Project/Loan</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Currency</TableHead>
-                <TableHead>Progress</TableHead>
-                <TableHead className="text-right">Monthly Installment</TableHead>
-                <TableHead className="text-right">Remaining Amount</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {liabilities.map((liability) => {
-                const remaining = isEditing(liability.id) 
-                  ? editedLiabilities[liability.id].totalAmount - editedLiabilities[liability.id].amountPaid
-                  : liability.totalAmount - liability.amountPaid
-                const progress = isEditing(liability.id)
-                  ? editedLiabilities[liability.id].totalAmount > 0 ? (editedLiabilities[liability.id].amountPaid / editedLiabilities[liability.id].totalAmount) * 100 : 0
-                  : liability.totalAmount > 0 ? (liability.amountPaid / liability.totalAmount) * 100 : 0
-                
-                const currentLiability = isEditing(liability.id) ? editedLiabilities[liability.id] : liability;
-
-                return (
-                  <TableRow key={liability.id}>
-                    <TableCell className="font-medium">
-                      {isEditing(liability.id) ? <Input value={currentLiability.name} onChange={e => handleEditChange(liability.id, 'name', e.target.value)} /> : currentLiability.name}
-                    </TableCell>
-                    <TableCell>
-                      {isEditing(liability.id) ? (
-                        <Select value={currentLiability.type} onValueChange={value => handleEditChange(liability.id, 'type', value)}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Real Estate">Real Estate</SelectItem>
-                            <SelectItem value="Loan">Loan</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : currentLiability.type}
-                    </TableCell>
-                    <TableCell>
-                      {isEditing(liability.id) ? (
-                        <Select value={currentLiability.currency} onValueChange={(value: Currency) => handleEditChange(liability.id, 'currency', value)}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="EGP">EGP</SelectItem>
-                            <SelectItem value="KWD">KWD</SelectItem>
-                            <SelectItem value="USD">USD</SelectItem>
-                            <SelectItem value="TRY">TRY</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : <Badge variant="outline">{currentLiability.currency}</Badge>}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Progress value={progress} className="w-32" />
-                        <span className="text-xs text-muted-foreground">{Math.round(progress)}%</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {isEditing(liability.id) ? <Input type="number" className="text-right" value={currentLiability.monthlyInstallment} onChange={e => handleEditChange(liability.id, 'monthlyInstallment', parseFloat(e.target.value))} /> : format(currentLiability.monthlyInstallment, currentLiability.currency)}
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {currentLiability.totalAmount > 0 ? format(remaining, currentLiability.currency) : 'N/A'}
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                       {isEditing(liability.id) ? (
-                        <Button variant="ghost" size="icon" onClick={() => handleSave(liability.id)}>
-                          <Save className="h-4 w-4 text-primary" />
-                          <span className="sr-only">Save</span>
-                        </Button>
-                      ) : (
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(liability)}>
-                          <Edit className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                      )}
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(liability.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                        <span className="sr-only">Delete</span>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
+        <CardContent className="space-y-8">
+            <div>
+              <h3 className="text-xl font-semibold mb-4">Project Installments</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {installments.map(p => {
+                    const progress = (p.paid / p.total) * 100;
+                    const remaining = p.total - p.paid;
+                    return (
+                    <div key={p.id} className="p-4 bg-secondary rounded-lg">
+                        <div className="flex justify-between items-center">
+                            <p className="font-bold">{p.project} <span className="font-normal text-muted-foreground">- {p.developer}</span></p>
+                            <span className="text-sm font-semibold text-green-700">{progress.toFixed(1)}%</span>
+                        </div>
+                        <Progress value={progress} className="my-2 h-2" />
+                        <div className="grid grid-cols-2 text-sm gap-x-4 gap-y-1 mt-2">
+                            <div><p className="text-muted-foreground">Total</p><p className="font-medium">{p.total.toLocaleString()} {p.currency}</p></div>
+                            <div><p className="text-muted-foreground">Paid</p><p className="font-medium">{p.paid.toLocaleString()} {p.currency}</p></div>
+                            <div><p className="text-muted-foreground">Remaining</p><p className="font-medium text-destructive">{remaining.toLocaleString()}</p></div>
+                            <div><p className="text-muted-foreground">Next Installment</p><p className="font-medium">{p.amount.toLocaleString()} {p.currency}</p></div>
+                            <div className="col-span-2"><p className="text-muted-foreground">Next Due Date</p><p className="font-medium">{new Date(p.nextDueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} ({p.frequency})</p></div>
+                        </div>
+                    </div>)
+                })}
+              </div>
+            </div>
+            
+            <div>
+                <h3 className="text-xl font-semibold mb-4">Loans</h3>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {loans.map(l => {
+                    const paid = l.initial - l.remaining;
+                    const progress = (paid / l.initial) * 100;
+                    return (
+                    <div key={l.id} className="p-4 bg-secondary rounded-lg">
+                        <div className="flex justify-between items-center">
+                            <p className="font-bold">{l.lender} Loan</p>
+                            <span className="text-sm font-semibold text-green-700">{progress.toFixed(1)}%</span>
+                        </div>
+                        <Progress value={progress} className="my-2 h-2" />
+                         <div className="grid grid-cols-2 text-sm gap-1 mt-2">
+                            <p className="text-muted-foreground">Remaining:</p><p className="font-medium text-destructive">{l.remaining.toLocaleString()} {l.currency}</p>
+                            <p className="text-muted-foreground">Monthly:</p><p className="font-medium">{l.monthlyPayment.toLocaleString()} {l.currency}</p>
+                        </div>
+                    </div>)
+                })}
+                </div>
+            </div>
         </CardContent>
       </Card>
-      <AddLiabilityDialog
-        isOpen={isAddLiabilityDialogOpen}
-        onClose={() => setIsAddLiabilityDialogOpen(false)}
-        onAddLiability={handleAddLiability}
-      />
     </div>
   )
 }

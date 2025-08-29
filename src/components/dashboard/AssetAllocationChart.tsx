@@ -1,37 +1,32 @@
+
 "use client"
 
-import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell } from "recharts"
-import { assets } from "@/lib/data"
-import { useCurrency } from "@/hooks/use-currency"
-import type { ExchangeRates } from "@/lib/types";
+import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell, Legend } from "recharts"
+import { useCurrency } from "@/hooks/use-currency";
 
-const rates: ExchangeRates = {
-  USD: 1,
-  EGP: 47.5,
-  KWD: 0.31,
-  TRY: 32.8,
-};
+const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))"];
 
-const convertToUsd = (value: number, currency: keyof ExchangeRates) => {
-  return value / rates[currency];
+interface AssetAllocationChartProps {
+    assetsBreakdown: {
+        existingRealEstate: number;
+        offPlanRealEstate: number;
+        cash: number;
+        gold: number;
+        other: number;
+    };
+    totalAssets: number;
 }
 
-const data = assets.reduce((acc, asset) => {
-  const existing = acc.find(item => item.name === asset.location);
-  const valueInUsd = convertToUsd(asset.marketValue, asset.currency)
-  if (existing) {
-    existing.value += valueInUsd;
-  } else {
-    acc.push({ name: asset.location, value: valueInUsd });
-  }
-  return acc;
-}, [] as { name: string; value: number }[]);
-
-const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))"];
-
-export function AssetAllocationChart() {
+export function AssetAllocationChart({ assetsBreakdown, totalAssets }: AssetAllocationChartProps) {
   const { format } = useCurrency();
   
+  const data = [
+      { name: "Real Estate", value: assetsBreakdown.existingRealEstate + assetsBreakdown.offPlanRealEstate },
+      { name: "Cash", value: assetsBreakdown.cash },
+      { name: "Gold", value: assetsBreakdown.gold },
+      { name: "Other", value: assetsBreakdown.other },
+  ];
+
   return (
     <div className="h-[250px]">
       <ResponsiveContainer width="100%" height="100%">
@@ -41,18 +36,19 @@ export function AssetAllocationChart() {
               background: "hsl(var(--background))",
               borderColor: "hsl(var(--border))",
             }}
-            formatter={(value: number) => [format(value, "USD"), "Value"]}
+            formatter={(value: number, name, props) => [format(value), name]}
           />
+          <Legend />
           <Pie
             data={data}
             cx="50%"
             cy="50%"
             labelLine={false}
-            outerRadius={100}
+            outerRadius={80}
             fill="#8884d8"
             dataKey="value"
             nameKey="name"
-            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+            label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
           >
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
