@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, HeartPulse, HelpCircle, Info, Lightbulb, Loader2, ThumbsUp, TrendingDown } from "lucide-react";
+import { CheckCircle, Download, HeartPulse, HelpCircle, Info, Lightbulb, Loader2, ThumbsUp, TrendingDown } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useCurrency } from "@/hooks/use-currency";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +38,51 @@ export default function HealthPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDownload = () => {
+    if (!analysis) return;
+
+    const reportContent = `
+# Financial Health Analysis
+
+**Date:** ${new Date().toLocaleDateString()}
+**Display Currency:** ${currency}
+
+---
+
+## Financial Health Score: ${analysis.healthScore} / 100
+
+---
+
+## Summary
+${analysis.summary}
+
+---
+
+## Strengths
+${analysis.strengths.map(item => `- ${item}`).join('\n')}
+
+---
+
+## Potential Risks
+${analysis.risks.map(item => `- ${item}`).join('\n')}
+
+---
+
+## Suggestions
+${analysis.suggestions.map(item => `- ${item}`).join('\n')}
+    `;
+
+    const blob = new Blob([reportContent.trim()], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Financial-Health-Analysis-${new Date().toISOString().split('T')[0]}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const getScoreColor = (score: number) => {
@@ -83,8 +128,12 @@ export default function HealthPage() {
       {analysis && (
         <div className="space-y-8">
             <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Your Financial Health Score</CardTitle>
+                     <Button variant="outline" onClick={handleDownload}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download Report
+                    </Button>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-center justify-center gap-4">
