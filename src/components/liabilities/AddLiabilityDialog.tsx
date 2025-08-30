@@ -29,159 +29,148 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { Liability } from "@/lib/types"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon } from "lucide-react"
-import { Calendar } from "@/components/ui/calendar"
-import { cn } from "@/lib/utils"
-import { format } from "date-fns"
+import type { Loan } from "@/lib/types"
 
 
 const liabilitySchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  type: z.enum(["Real Estate", "Loan"]),
-  totalAmount: z.coerce.number().min(1, { message: "Total amount is required." }),
-  amountPaid: z.coerce.number().min(0, { message: "Amount paid must be a positive number." }),
-  dueDate: z.date({
-    required_error: "A due date is required.",
-  }),
+  lender: z.string().min(2, { message: "Lender name must be at least 2 characters." }),
+  initial: z.coerce.number().min(1, { message: "Initial amount is required." }),
+  remaining: z.coerce.number().min(1, { message: "Remaining amount is required." }),
+  currency: z.enum(["EGP", "USD", "KWD", "TRY"]),
+  monthlyPayment: z.coerce.number().min(1, { message: "Monthly payment is required." }),
+  finalPayment: z.string().min(1, { message: "Final payment date is required." }),
 })
 
 interface AddLiabilityDialogProps {
   isOpen: boolean
   onClose: () => void
-  onAddLiability: (liability: Omit<Liability, "id" | 'dueDate'> & { dueDate: string }) => void
+  onAddLiability: (liability: Omit<Loan, "id">) => void
 }
 
 export function AddLiabilityDialog({ isOpen, onClose, onAddLiability }: AddLiabilityDialogProps) {
   const form = useForm<z.infer<typeof liabilitySchema>>({
     resolver: zodResolver(liabilitySchema),
     defaultValues: {
-      name: "",
-      type: "Loan",
-      totalAmount: 0,
-      amountPaid: 0,
+      lender: "",
+      initial: 0,
+      remaining: 0,
+      currency: "USD",
+      monthlyPayment: 0,
+      finalPayment: new Date().toISOString().split('T')[0],
     },
   })
 
   function onSubmit(values: z.infer<typeof liabilitySchema>) {
-    onAddLiability({ ...values, dueDate: values.dueDate.toISOString() })
+    onAddLiability(values)
     form.reset()
+    onClose();
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Liability</DialogTitle>
+          <DialogTitle>Add New Loan</DialogTitle>
           <DialogDescription>
-            Enter the details of your new liability below. Click save when you're done.
+            Enter the details of your new loan below.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="name"
+              name="lender"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Project/Loan Name</FormLabel>
+                  <FormLabel>Lender Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Car Loan" {...field} />
+                    <Input placeholder="e.g., Gulf Bank" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type</FormLabel>
-                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <div className="grid grid-cols-2 gap-4">
+               <FormField
+                control={form.control}
+                name="initial"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Initial Amount</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a liability type" />
-                      </SelectTrigger>
+                      <Input type="number" placeholder="20000" {...field} />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Real Estate">Real Estate</SelectItem>
-                      <SelectItem value="Loan">Loan</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="totalAmount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Total Amount</FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="e.g., 30000" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="amountPaid"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Amount Paid</FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="e.g., 15000" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="dueDate"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Due Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="remaining"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Remaining</FormLabel>
+                     <FormControl>
+                      <Input type="number" placeholder="18000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+             <div className="grid grid-cols-2 gap-4">
+               <FormField
+                control={form.control}
+                name="monthlyPayment"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Monthly Payment</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="400" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Currency</FormLabel>
+                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
                       </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date < new Date()
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      <SelectContent>
+                        <SelectItem value="USD">USD</SelectItem>
+                        <SelectItem value="EGP">EGP</SelectItem>
+                        <SelectItem value="KWD">KWD</SelectItem>
+                        <SelectItem value="TRY">TRY</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+             <FormField
+                control={form.control}
+                name="finalPayment"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Final Payment Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
               <Button type="submit">Save Liability</Button>
             </DialogFooter>
           </form>
@@ -190,3 +179,5 @@ export function AddLiabilityDialog({ isOpen, onClose, onAddLiability }: AddLiabi
     </Dialog>
   )
 }
+
+    

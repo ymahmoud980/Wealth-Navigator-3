@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useFinancialData } from "@/contexts/FinancialDataContext"
-import type { FinancialData } from "@/lib/types";
+import type { FinancialData, Loan } from "@/lib/types";
 import { LiabilityUploader } from "@/components/liabilities/LiabilityUploader";
 import { Trash2 } from "lucide-react";
 import {
@@ -19,13 +19,16 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { AddLiabilityDialog } from "@/components/liabilities/AddLiabilityDialog";
 
 export default function LiabilitiesPage() {
   const { data, setData } = useFinancialData();
   const [isEditing, setIsEditing] = useState(false);
   const [editableData, setEditableData] = useState<FinancialData>(JSON.parse(JSON.stringify(data)));
   const [deleteTarget, setDeleteTarget] = useState<{type: string, id: string} | null>(null);
+  const [isAddLiabilityDialogOpen, setIsAddLiabilityDialogOpen] = useState(false);
+
 
   const handleEditClick = () => {
     setEditableData(JSON.parse(JSON.stringify(data)));
@@ -78,6 +81,23 @@ export default function LiabilitiesPage() {
     setDeleteTarget(null);
   };
   
+  const handleAddLiability = (newLoan: Omit<Loan, 'id'>) => {
+    const fullLoan: Loan = {
+      ...newLoan,
+      id: `l${new Date().getTime()}`,
+    };
+
+    const updatedData = {
+      ...data,
+      liabilities: {
+        ...data.liabilities,
+        loans: [...data.liabilities.loans, fullLoan],
+      },
+    };
+    setData(updatedData);
+    setIsAddLiabilityDialogOpen(false);
+  }
+
   const formatNumber = (num: number) => num.toLocaleString();
 
   const currentData = isEditing ? editableData : data;
@@ -94,7 +114,7 @@ export default function LiabilitiesPage() {
               <CardDescription>Track your installments and loans. Click "Edit" to make changes.</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button>Add New Liability</Button>
+              <Button onClick={() => setIsAddLiabilityDialogOpen(true)}>Add New Liability</Button>
               {isEditing ? (
                 <>
                   <Button onClick={handleSaveClick}>Save Changes</Button>
@@ -186,6 +206,11 @@ export default function LiabilitiesPage() {
           </CardContent>
         </Card>
       </div>
+      <AddLiabilityDialog
+        isOpen={isAddLiabilityDialogOpen}
+        onClose={() => setIsAddLiabilityDialogOpen(false)}
+        onAddLiability={handleAddLiability}
+      />
       <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -203,3 +228,5 @@ export default function LiabilitiesPage() {
     </>
   )
 }
+
+    
