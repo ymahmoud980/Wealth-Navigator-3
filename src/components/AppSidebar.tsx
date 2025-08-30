@@ -25,6 +25,7 @@ import {
   CircleAlert,
   FileText,
   Sparkles,
+  HeartPulse,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
@@ -35,6 +36,7 @@ const navItems = [
   { href: "/liabilities", label: "Liabilities", icon: <Landmark /> },
   { href: "/cashflow", label: "Cash Flow", icon: <Wallet /> },
   { href: "/breakdown", label: "Calculation Breakdown", icon: <FileText /> },
+  { href: "/health", label: "Financial Health", icon: <HeartPulse /> },
   { href: "/advisor", label: "AI Advisor", icon: <BrainCircuit /> },
   { href: "/insights", label: "AI Insights", icon: <Sparkles /> },
   { href: "/calculator", label: "Currency Calculator", icon: <Calculator /> },

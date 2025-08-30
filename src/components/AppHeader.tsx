@@ -32,6 +32,7 @@ const pageTitles: { [key: string]: string } = {
   "/insights": "AI Document Insights",
   "/calculator": "Currency Calculator",
   "/breakdown": "Calculation Breakdown",
+  "/health": "Financial Health Analysis",
 };
 
 export function AppHeader() {
