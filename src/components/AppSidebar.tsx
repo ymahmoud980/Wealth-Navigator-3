@@ -34,10 +34,10 @@ const navItems = [
   { href: "/assets", label: "Assets", icon: <Home /> },
   { href: "/liabilities", label: "Liabilities", icon: <Landmark /> },
   { href: "/cashflow", label: "Cash Flow", icon: <Wallet /> },
-  { href: "/breakdown", label: "Breakdown", icon: <FileText /> },
+  { href: "/breakdown", label: "Calculation Breakdown", icon: <FileText /> },
   { href: "/advisor", label: "AI Advisor", icon: <BrainCircuit /> },
   { href: "/insights", label: "AI Insights", icon: <Sparkles /> },
-  { href: "/calculator", label: "Calculator", icon: <Calculator /> },
+  { href: "/calculator", label: "Currency Calculator", icon: <Calculator /> },
 ];
 
 export function AppSidebar() {

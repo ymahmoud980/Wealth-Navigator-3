@@ -30,7 +30,7 @@ const pageTitles: { [key: string]: string } = {
   "/cashflow": "Cash Flow Management",
   "/advisor": "AI Financial Advisor",
   "/insights": "AI Document Insights",
-  "/calculator": "Calculation Engine",
+  "/calculator": "Currency Calculator",
   "/breakdown": "Calculation Breakdown",
 };
 

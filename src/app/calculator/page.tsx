@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo } from "react"
@@ -12,6 +13,8 @@ const rates: ExchangeRates = {
   USD: 1,
   EGP: 47.5,
   KWD: 0.31,
+  TRY: 32.85,
+  GOLD_GRAM: 75.50
 };
 
 export default function CalculatorPage() {
@@ -61,6 +64,7 @@ export default function CalculatorPage() {
                         <SelectItem value="USD">USD - US Dollar</SelectItem>
                         <SelectItem value="EGP">EGP - Egyptian Pound</SelectItem>
                         <SelectItem value="KWD">KWD - Kuwaiti Dinar</SelectItem>
+                        <SelectItem value="TRY">TRY - Turkish Lira</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -82,6 +86,7 @@ export default function CalculatorPage() {
                     <SelectItem value="USD">USD - US Dollar</SelectItem>
                     <SelectItem value="EGP">EGP - Egyptian Pound</SelectItem>
                     <SelectItem value="KWD">KWD - Kuwaiti Dinar</SelectItem>
+                    <SelectItem value="TRY">TRY - Turkish Lira</SelectItem>
                 </SelectContent>
             </Select>
         </div>
