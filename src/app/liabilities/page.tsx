@@ -169,11 +169,11 @@ export default function LiabilitiesPage() {
                           <div className="grid grid-cols-2 text-sm gap-x-4 gap-y-2 mt-2">
                               <div>
                                   <label className="text-xs font-medium">Total ({p.currency})</label>
-                                  {isEditing ? <Input type="number" value={p.total} onChange={e => handleInstallmentChange(p.id, 'total', e.target.value)} className="h-8"/> : <p className="font-medium">{formatNumber(p.total)}</p>}
+                                  {isEditing ? <Input type="number" defaultValue={p.total} onChange={e => handleInstallmentChange(p.id, 'total', e.target.value)} className="h-8"/> : <p className="font-medium">{formatNumber(p.total)}</p>}
                               </div>
                               <div>
                                   <label className="text-xs font-medium">Paid ({p.currency})</label>
-                                  {isEditing ? <Input type="number" value={p.paid} onChange={e => handleInstallmentChange(p.id, 'paid', e.target.value)} className="h-8"/> : <p className="font-medium">{formatNumber(p.paid)}</p>}
+                                  {isEditing ? <Input type="number" defaultValue={p.paid} onChange={e => handleInstallmentChange(p.id, 'paid', e.target.value)} className="h-8"/> : <p className="font-medium">{formatNumber(p.paid)}</p>}
                               </div>
                               <div>
                                   <p className="text-muted-foreground">Remaining</p>
@@ -181,7 +181,7 @@ export default function LiabilitiesPage() {
                               </div>
                               <div>
                                   <label className="text-xs font-medium">Next Installment ({p.currency})</label>
-                                  {isEditing ? <Input type="number" value={p.amount} onChange={e => handleInstallmentChange(p.id, 'amount', e.target.value)} className="h-8"/> : <p className="font-medium">{formatNumber(p.amount)}</p>}
+                                  {isEditing ? <Input type="number" defaultValue={p.amount} onChange={e => handleInstallmentChange(p.id, 'amount', e.target.value)} className="h-8"/> : <p className="font-medium">{formatNumber(p.amount)}</p>}
                               </div>
                               <div className="col-span-2">
                                   <p className="text-muted-foreground">Next Due Date</p>
@@ -217,11 +217,11 @@ export default function LiabilitiesPage() {
                           <div className="grid grid-cols-2 text-sm gap-2 mt-2">
                               <div>
                                   <label className="text-xs font-medium">Remaining ({l.currency})</label>
-                                  {isEditing ? <Input type="number" value={l.remaining} onChange={e => handleLoanChange(l.id, 'remaining', e.target.value)} className="h-8"/> : <p className="font-medium">{formatNumber(l.remaining)}</p>}
+                                  {isEditing ? <Input type="number" defaultValue={l.remaining} onChange={e => handleLoanChange(l.id, 'remaining', e.target.value)} className="h-8"/> : <p className="font-medium">{formatNumber(l.remaining)}</p>}
                               </div>
                               <div>
                                   <label className="text-xs font-medium">Monthly Payment ({l.currency})</label>
-                                  {isEditing ? <Input type="number" value={l.monthlyPayment} onChange={e => handleLoanChange(l.id, 'monthlyPayment', e.target.value)} className="h-8"/> : <p className="font-medium">{l.monthlyPayment.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</p>}
+                                  {isEditing ? <Input type="number" defaultValue={l.monthlyPayment} onChange={e => handleLoanChange(l.id, 'monthlyPayment', e.target.value)} className="h-8"/> : <p className="font-medium">{l.monthlyPayment.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</p>}
                               </div>
                           </div>
                       </div>)
