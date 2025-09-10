@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AddLiabilityDialog } from "@/components/liabilities/AddLiabilityDialog";
 import { AddInstallmentDialog } from "@/components/liabilities/AddInstallmentDialog";
+import { format } from "date-fns";
 
 
 export default function LiabilitiesPage() {
@@ -119,6 +120,29 @@ export default function LiabilitiesPage() {
   }
 
   const formatNumber = (num: number) => num.toLocaleString();
+  
+  const calculateCompletionDate = (p: Installment) => {
+      const remaining = p.total - p.paid;
+      if (remaining <= 0 || p.amount <= 0) return "Completed";
+
+      const paymentsRemaining = Math.ceil(remaining / p.amount);
+      const today = new Date();
+      let completionDate = new Date(p.nextDueDate);
+
+      let monthsToAdd = 0;
+      if (p.frequency === 'Quarterly') {
+          monthsToAdd = paymentsRemaining * 3;
+          completionDate.setMonth(completionDate.getMonth() + monthsToAdd);
+      } else if (p.frequency === 'Semi-Annual') {
+          monthsToAdd = paymentsRemaining * 6;
+          completionDate.setMonth(completionDate.getMonth() + monthsToAdd);
+      } else if (p.frequency === 'Annual') {
+          monthsToAdd = paymentsRemaining * 12;
+          completionDate.setFullYear(completionDate.getFullYear() + monthsToAdd);
+      }
+      
+      return format(completionDate, 'MMM yyyy');
+  }
 
   const currentData = isEditing ? editableData : data;
   const { loans, installments } = currentData.liabilities;
@@ -183,9 +207,13 @@ export default function LiabilitiesPage() {
                                   <label className="text-xs font-medium">Next Installment ({p.currency})</label>
                                   {isEditing ? <Input type="number" defaultValue={p.amount} onChange={e => handleInstallmentChange(p.id, 'amount', e.target.value)} className="h-8"/> : <p className="font-medium">{formatNumber(p.amount)}</p>}
                               </div>
-                              <div className="col-span-2">
+                              <div>
                                   <p className="text-muted-foreground">Next Due Date</p>
                                   <p className="font-medium">{new Date(p.nextDueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} ({p.frequency})</p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground">Est. Completion</p>
+                                <p className="font-medium">{calculateCompletionDate(p)}</p>
                               </div>
                           </div>
                       </div>)

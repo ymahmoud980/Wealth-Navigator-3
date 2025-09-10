@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useFinancialData } from "@/contexts/FinancialDataContext"
-import type { FinancialData, RealEstateAsset, CashAsset, GoldAsset, OtherAsset } from "@/lib/types";
+import type { FinancialData, RealEstateAsset, UnderDevelopmentAsset, CashAsset, GoldAsset, OtherAsset } from "@/lib/types";
 import { AddAssetDialog } from "@/components/assets/AddAssetDialog";
 import { Trash2 } from "lucide-react";
 import {
@@ -53,6 +53,16 @@ export default function AssetsPage() {
       setEditableData(newData);
     }
   };
+  
+  const handleUnderDevelopmentChange = (id: string, key: 'currentValue' | 'purchasePrice', value: string) => {
+    const numericValue = parseFloat(value) || 0;
+    const newData = { ...editableData };
+    const asset = newData.assets.underDevelopment.find(a => a.id === id);
+    if (asset) {
+      asset[key] = numericValue;
+      setEditableData(newData);
+    }
+  };
 
   const handleOtherAssetChange = (id: string, value: string) => {
     const numericValue = parseFloat(value) || 0;
@@ -91,6 +101,8 @@ export default function AssetsPage() {
 
     if (type === 'realEstate') {
       updatedData.assets.realEstate.push(assetWithId as RealEstateAsset);
+    } else if (type === 'underDevelopment') {
+      updatedData.assets.underDevelopment.push(assetWithId as UnderDevelopmentAsset);
     } else if (type === 'cash') {
       updatedData.assets.cash.push(assetWithId as CashAsset);
     } else if (type === 'gold') {
@@ -111,6 +123,8 @@ export default function AssetsPage() {
 
     if (type === 'realEstate') {
         updatedData.assets.realEstate = updatedData.assets.realEstate.filter((item: any) => item.id !== id);
+    } else if (type === 'underDevelopment') {
+        updatedData.assets.underDevelopment = updatedData.assets.underDevelopment.filter((item: any) => item.id !== id);
     } else if (type === 'cash') {
         updatedData.assets.cash = updatedData.assets.cash.filter((item: any) => item.id !== id);
     } else if (type === 'gold') {
@@ -126,8 +140,7 @@ export default function AssetsPage() {
   const formatNumber = (num: number) => num.toLocaleString();
 
   const currentData = isEditing ? editableData : data;
-  const { realEstate, cash, gold, otherAssets } = currentData.assets;
-  const offPlanAssets = currentData.liabilities.installments;
+  const { realEstate, underDevelopment, cash, gold, otherAssets } = currentData.assets;
 
   return (
     <>
@@ -199,11 +212,43 @@ export default function AssetsPage() {
             <div>
               <h3 className="text-xl font-semibold mb-4">Real Estate (Under Development)</h3>
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {offPlanAssets.map(p => (
-                      <div key={p.id} className="p-4 bg-secondary rounded-lg">
-                          <p className="font-bold">{p.project}</p>
-                           <p className="text-sm font-semibold mt-2">Current Asset Value: {formatNumber(p.paid * 2)} {p.currency}</p>
-                           <p className="text-xs text-muted-foreground mt-1">(Calculated as 2x amount paid)</p>
+                  {underDevelopment.map(p => (
+                      <div key={p.id} className="p-4 bg-secondary rounded-lg space-y-2 group relative">
+                          {isEditing && (
+                            <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive/70 hover:text-destructive" onClick={() => setDeleteTarget({ type: 'underDevelopment', id: p.id })}>
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <div>
+                            <p className="font-bold">{p.name}</p>
+                            <p className="text-sm text-muted-foreground">{p.location}</p>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-medium">Purchase Price ({p.currency})</label>
+                             {isEditing ? (
+                              <Input 
+                                  type="number" 
+                                  defaultValue={p.purchasePrice}
+                                  onBlur={(e) => handleUnderDevelopmentChange(p.id, 'purchasePrice', e.target.value)}
+                                  className="h-8"
+                              />
+                            ) : (
+                              <p className="font-medium">{formatNumber(p.purchasePrice)}</p>
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                             <label className="text-xs font-medium">Current Value ({p.currency})</label>
+                             {isEditing ? (
+                              <Input 
+                                  type="number" 
+                                  defaultValue={p.currentValue}
+                                  onBlur={(e) => handleUnderDevelopmentChange(p.id, 'currentValue', e.target.value)}
+                                  className="h-8"
+                              />
+                            ) : (
+                              <p className="font-medium">{formatNumber(p.currentValue)}</p>
+                            )}
+                          </div>
                       </div>
                   ))}
               </div>
@@ -307,5 +352,3 @@ export default function AssetsPage() {
     </>
   )
 }
-
-    

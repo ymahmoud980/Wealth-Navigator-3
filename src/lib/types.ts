@@ -18,6 +18,16 @@ export interface RealEstateAsset {
   nextRentDueDate: string;
 }
 
+export interface UnderDevelopmentAsset {
+  id: string;
+  name: string;
+  location: string;
+  purchasePrice: number;
+  currentValue: number;
+  currency: Currency;
+  linkedInstallmentId: string;
+}
+
 export interface CashAsset {
   id: string;
   location: string;
@@ -46,6 +56,7 @@ export interface Salary {
 
 export interface Assets {
   realEstate: RealEstateAsset[];
+  underDevelopment: UnderDevelopmentAsset[];
   cash: CashAsset[];
   gold: GoldAsset[];
   otherAssets: OtherAsset[];

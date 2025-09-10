@@ -33,9 +33,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import type { RealEstateAsset, CashAsset, GoldAsset, OtherAsset } from "@/lib/types"
+import type { RealEstateAsset, CashAsset, GoldAsset, OtherAsset, UnderDevelopmentAsset } from "@/lib/types"
 
-type AssetType = "realEstate" | "cash" | "gold" | "other"
+type AssetType = "realEstate" | "underDevelopment" | "cash" | "gold" | "other"
 
 const realEstateSchema = z.object({
   name: z.string().min(2, "Name is required."),
@@ -44,6 +44,15 @@ const realEstateSchema = z.object({
   currency: z.enum(["EGP", "USD", "KWD", "TRY"]),
   monthlyRent: z.coerce.number().min(0),
   rentCurrency: z.enum(["EGP", "USD", "KWD", "TRY"]).optional(),
+});
+
+const underDevelopmentSchema = z.object({
+  name: z.string().min(2, "Name is required."),
+  location: z.string().min(2, "Location is required."),
+  purchasePrice: z.coerce.number().min(1),
+  currentValue: z.coerce.number().min(1),
+  currency: z.enum(["EGP", "USD", "KWD", "TRY"]),
+  linkedInstallmentId: z.string().optional(), // This could be linked later
 });
 
 const cashSchema = z.object({
@@ -64,14 +73,16 @@ const otherSchema = z.object({
 });
 
 const formSchema = z.object({
-  assetType: z.enum(["realEstate", "cash", "gold", "other"]),
+  assetType: z.enum(["realEstate", "underDevelopment", "cash", "gold", "other"]),
   realEstate: realEstateSchema.optional(),
+  underDevelopment: underDevelopmentSchema.optional(),
   cash: cashSchema.optional(),
   gold: goldSchema.optional(),
   other: otherSchema.optional(),
 }).refine(data => {
     switch (data.assetType) {
         case 'realEstate': return !!data.realEstate;
+        case 'underDevelopment': return !!data.underDevelopment;
         case 'cash': return !!data.cash;
         case 'gold': return !!data.gold;
         case 'other': return !!data.other;
@@ -96,6 +107,7 @@ export function AddAssetDialog({ isOpen, onClose, onAddAsset }: AddAssetDialogPr
     defaultValues: {
       assetType: "realEstate",
       realEstate: { name: "", location: "", currentValue: 0, currency: "USD", monthlyRent: 0 },
+      underDevelopment: { name: "", location: "", purchasePrice: 0, currentValue: 0, currency: "USD" },
       cash: { location: "", amount: 0, currency: "USD" },
       gold: { description: "Gold Bars", grams: 0 },
       other: { description: "", value: 0, currency: "USD" },
@@ -110,6 +122,9 @@ export function AddAssetDialog({ isOpen, onClose, onAddAsset }: AddAssetDialogPr
         finalValues.rentDueDay = 1;
         finalValues.rentFrequency = 'monthly';
         finalValues.nextRentDueDate = new Date().toISOString().split('T')[0];
+    }
+     if (assetType === 'underDevelopment') {
+        finalValues.linkedInstallmentId = `inst-${new Date().getTime()}`; // Placeholder
     }
     onAddAsset(finalValues, assetType)
     form.reset()
@@ -148,7 +163,13 @@ export function AddAssetDialog({ isOpen, onClose, onAddAsset }: AddAssetDialogPr
                         <FormControl>
                           <RadioGroupItem value="realEstate" />
                         </FormControl>
-                        <FormLabel className="font-normal">Real Estate</FormLabel>
+                        <FormLabel className="font-normal">Real Estate (Existing)</FormLabel>
+                      </FormItem>
+                       <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="underDevelopment" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Real Estate (Dev.)</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
@@ -189,6 +210,17 @@ export function AddAssetDialog({ isOpen, onClose, onAddAsset }: AddAssetDialogPr
                     </div>
                 </div>
             )}
+            {assetType === 'underDevelopment' && (
+                <div className="space-y-4 p-4 border rounded-md">
+                    <FormField control={form.control} name="underDevelopment.name" render={({ field }) => ( <FormItem><FormLabel>Property Name</FormLabel><FormControl><Input placeholder="e.g., Downtown Apartment" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="underDevelopment.location" render={({ field }) => ( <FormItem><FormLabel>Location</FormLabel><FormControl><Input placeholder="e.g., New Cairo, Egypt" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="underDevelopment.purchasePrice" render={({ field }) => ( <FormItem><FormLabel>Purchase Price</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="underDevelopment.currentValue" render={({ field }) => ( <FormItem><FormLabel>Current Value</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    </div>
+                     <FormField control={form.control} name="underDevelopment.currency" render={({ field }) => ( <FormItem><FormLabel>Currency</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="EGP">EGP</SelectItem><SelectItem value="KWD">KWD</SelectItem><SelectItem value="TRY">TRY</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />
+                </div>
+            )}
              {assetType === 'cash' && (
                 <div className="space-y-4 p-4 border rounded-md">
                     <FormField control={form.control} name="cash.location" render={({ field }) => ( <FormItem><FormLabel>Location</FormLabel><FormControl><Input placeholder="e.g., Egypt Bank Account" {...field} /></FormControl><FormMessage /></FormItem>)} />
@@ -225,5 +257,3 @@ export function AddAssetDialog({ isOpen, onClose, onAddAsset }: AddAssetDialogPr
     </Dialog>
   )
 }
-
-    

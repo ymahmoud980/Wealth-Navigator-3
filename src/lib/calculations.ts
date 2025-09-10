@@ -42,11 +42,7 @@ export function calculateMetrics(data: FinancialData, displayCurrency: Currency)
     const convertToDisplay = (amount: number, from: Currency | 'GOLD_GRAM') => convert(amount, from, displayCurrency, rates);
 
     // --- ASSET CALCULATIONS ---
-    const offPlanAssetsValue = data.liabilities.installments.reduce((sum, p) => {
-        const assetValue = p.paid * 2;
-        return sum + convertToDisplay(assetValue, p.currency);
-    }, 0);
-
+    const offPlanAssetsValue = data.assets.underDevelopment.reduce((sum, p) => sum + convertToDisplay(p.currentValue, p.currency), 0);
     const existingRealEstateValue = data.assets.realEstate.reduce((sum, p) => sum + convertToDisplay(p.currentValue, p.currency), 0);
     const cashValue = data.assets.cash.reduce((sum, c) => sum + convertToDisplay(c.amount, c.currency), 0);
     const goldValue = data.assets.gold.reduce((sum, g) => sum + convertToDisplay(g.grams, "GOLD_GRAM"), 0);

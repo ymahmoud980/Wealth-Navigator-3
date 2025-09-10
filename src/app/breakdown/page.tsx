@@ -63,8 +63,8 @@ export default function BreakdownPage() {
             <Row label="Existing Real Estate" value={metrics.assets.existingRealEstate} isTotal />
             {data.assets.realEstate.map(asset => <Row key={asset.id} label={asset.name} value={convert(asset.currentValue, asset.currency, currency, rates)} isSub />)}
 
-            <Row label="Off-Plan Real Estate (Paid*2)" value={metrics.assets.offPlanRealEstate} isTotal />
-            {data.liabilities.installments.map(asset => <Row key={asset.id} label={asset.project} value={convert(asset.paid * 2, asset.currency, currency, rates)} isSub />)}
+            <Row label="Off-Plan Real Estate" value={metrics.assets.offPlanRealEstate} isTotal />
+            {data.assets.underDevelopment.map(asset => <Row key={asset.id} label={asset.name} value={convert(asset.currentValue, asset.currency, currency, rates)} isSub />)}
             
             <Row label="Cash Holdings" value={metrics.assets.cash} isTotal />
             {data.assets.cash.map(asset => <Row key={asset.id} label={`Cash - ${asset.location}`} value={convert(asset.amount, asset.currency, currency, rates)} isSub />)}
