@@ -5,7 +5,7 @@ import { createContext, useState, useEffect, useContext, useMemo, type ReactNode
 import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import type { FinancialData } from '@/lib/types';
 import { initialFinancialData } from '@/lib/data';
-import { getFirebaseDb } from '@/lib/firebase';
+import { db } from '@/lib/firebase';
 import { useAuth } from '@/hooks/use-auth';
 
 interface FinancialDataContextType {
@@ -34,7 +34,6 @@ export function FinancialDataProvider({ children }: { children: ReactNode }) {
     }
 
     setLoading(true);
-    const db = getFirebaseDb();
     const docRef = doc(db, 'users', user.uid);
 
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
@@ -63,7 +62,6 @@ export function FinancialDataProvider({ children }: { children: ReactNode }) {
     setDataState(newData); // Optimistic update
     if (user) {
       setIsSaving(true);
-      const db = getFirebaseDb();
       const docRef = doc(db, 'users', user.uid);
       try {
         await setDoc(docRef, newData, { merge: true });

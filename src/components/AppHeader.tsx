@@ -25,7 +25,7 @@ import { useCurrency } from "@/hooks/use-currency";
 import type { Currency } from "@/lib/types";
 import { useAuth } from "@/hooks/use-auth";
 import { signOut } from "firebase/auth";
-import { getFirebaseAuth } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 
 const pageTitles: { [key: string]: string } = {
   "/": "Dashboard",
@@ -47,7 +47,6 @@ export function AppHeader() {
   const { user } = useAuth();
   
   const handleLogout = async () => {
-    const auth = getFirebaseAuth();
     await signOut(auth);
     router.push('/login');
   }

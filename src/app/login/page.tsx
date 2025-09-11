@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { getFirebaseAuth } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address."),
@@ -42,7 +42,6 @@ export default function LoginPage() {
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);
-    const auth = getFirebaseAuth();
     try {
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, values.email, values.password);

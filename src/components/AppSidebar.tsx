@@ -33,7 +33,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { getFirebaseAuth } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: <LayoutDashboard /> },
@@ -54,7 +54,6 @@ export function AppSidebar() {
   const router = useRouter();
 
   const handleLogout = async () => {
-    const auth = getFirebaseAuth();
     await signOut(auth);
     router.push('/login');
   }
