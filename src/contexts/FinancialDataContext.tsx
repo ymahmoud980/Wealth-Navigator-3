@@ -1,11 +1,10 @@
 
 "use client";
 
-import { createContext, useState, useEffect, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useState, useEffect, useContext, useMemo, type ReactNode, useCallback } from 'react';
 import type { FinancialData } from '@/lib/types';
 import { initialFinancialData } from '@/lib/data';
-import { db } from '@/lib/firebase';
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { getFinancialData, setFinancialData } from '@/ai/flows/manage-financial-data';
 
 interface FinancialDataContextType {
   data: FinancialData;
@@ -19,22 +18,15 @@ export function FinancialDataProvider({ children }: { children: ReactNode }) {
   const [data, setDataState] = useState<FinancialData>(initialFinancialData);
   const [loading, setLoading] = useState(true);
 
-  const docRef = useMemo(() => doc(db, 'financialData', 'shared'), []);
-
   useEffect(() => {
     const fetchInitialData = async () => {
+      setLoading(true);
       try {
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setDataState(docSnap.data() as FinancialData);
-        } else {
-          // If no document exists, create one with the initial data
-          await setDoc(docRef, initialFinancialData);
-          setDataState(initialFinancialData);
-        }
+        const result = await getFinancialData();
+        setDataState(result);
       } catch (error) {
-        console.error("Error fetching initial financial data from Firestore:", error);
-        // Fallback to initial data if Firestore is unreachable
+        console.error("Error fetching financial data:", error);
+        // Fallback to initial data if the flow fails
         setDataState(initialFinancialData);
       } finally {
         setLoading(false);
@@ -42,39 +34,26 @@ export function FinancialDataProvider({ children }: { children: ReactNode }) {
     };
 
     fetchInitialData();
+  }, []);
 
-    // Set up a listener for real-time updates
-    const unsubscribe = onSnapshot(docRef, (doc) => {
-        if (doc.exists()) {
-            setDataState(doc.data() as FinancialData);
-        }
-    }, (error) => {
-        console.error("Error with Firestore snapshot listener:", error);
-    });
-
-    // Cleanup the listener on unmount
-    return () => unsubscribe();
-  }, [docRef]);
-
-  const setData = async (newData: FinancialData) => {
+  const setData = useCallback(async (newData: FinancialData) => {
     try {
-        setLoading(true);
-        const updatedData = { ...newData, lastUpdated: new Date().toISOString() };
-        await setDoc(docRef, updatedData);
-        // The onSnapshot listener will update the state, but we can update it here for quicker UI response
-        setDataState(updatedData);
+      // Optimistic update for better UX
+      setDataState(newData); 
+      const updatedData = { ...newData, lastUpdated: new Date().toISOString() };
+      await setFinancialData(updatedData);
+      // No need to set state again as the optimistic update already handled it
     } catch (error) {
-      console.error("Failed to save data to Firestore:", error);
-    } finally {
-        setLoading(false);
+      console.error("Failed to save data:", error);
+      // Optionally, revert the state if the save fails
     }
-  };
+  }, []);
 
   const value = useMemo(() => ({
     data,
     setData,
     loading,
-  }), [data, loading]);
+  }), [data, loading, setData]);
 
   return (
     <FinancialDataContext.Provider value={value}>
