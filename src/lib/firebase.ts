@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApp, getApps } from "firebase/app";
+import { initializeApp, getApp, getApps, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 
@@ -10,12 +10,16 @@ const firebaseConfig = {
   "storageBucket": "wealth-navigator-ab3ww.firebasestorage.app",
   "apiKey": "AIzaSyAjVlNb3BDMnApRWhGLLJxaNFefARHmZR8",
   "authDomain": "wealth-navigator-ab3ww.firebaseapp.com",
-  "measurementId": "",
   "messagingSenderId": "814157293824"
 };
 
 // Initialize Firebase
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+let app: FirebaseApp;
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApp();
+}
 
 const getFirebaseAuth = (): Auth => getAuth(app);
 const getFirebaseDb = (): Firestore => getFirestore(app);
