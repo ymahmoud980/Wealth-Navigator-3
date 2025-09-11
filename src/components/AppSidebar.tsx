@@ -33,6 +33,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { getAuth, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { getFirebaseAuth } from "@/lib/firebase";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: <LayoutDashboard /> },
@@ -50,7 +51,7 @@ export function AppSidebar() {
   const pathname = usePathname();
   const [showIssue, setShowIssue] = useState(true);
   const { user } = useAuth();
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const router = useRouter();
 
   const handleLogout = async () => {

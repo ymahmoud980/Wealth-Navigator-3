@@ -2,10 +2,10 @@
 "use client";
 
 import { createContext, useState, useEffect, useContext, useMemo, type ReactNode } from 'react';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
+import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import type { FinancialData } from '@/lib/types';
 import { initialFinancialData } from '@/lib/data';
-import { app } from '@/lib/firebase';
+import { getFirebaseDb } from '@/lib/firebase';
 import { useAuth } from '@/hooks/use-auth';
 
 interface FinancialDataContextType {
@@ -22,7 +22,7 @@ export function FinancialDataProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  const db = getFirestore(app);
+  const db = getFirebaseDb();
 
   useEffect(() => {
     if (authLoading) {
@@ -80,7 +80,7 @@ export function FinancialDataProvider({ children }: { children: ReactNode }) {
     data,
     setData,
     loading,
-  }), [data, loading]);
+  }), [data, setData, loading]);
 
   return (
     <FinancialDataContext.Provider value={value}>

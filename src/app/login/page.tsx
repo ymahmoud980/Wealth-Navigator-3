@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { app } from "@/lib/firebase";
+import { getFirebaseAuth } from "@/lib/firebase";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address."),
@@ -40,7 +40,7 @@ export default function LoginPage() {
     defaultValues: { email: "", password: "" },
   });
 
-  const auth = getAuth(app);
+  const auth = getFirebaseAuth();
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);

@@ -24,7 +24,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrency } from "@/hooks/use-currency";
 import type { Currency } from "@/lib/types";
 import { useAuth } from "@/hooks/use-auth";
-import { getAuth, signOut } from "firebase/auth";
+import { signOut } from "firebase/auth";
+import { getFirebaseAuth } from "@/lib/firebase";
 
 const pageTitles: { [key: string]: string } = {
   "/": "Dashboard",
@@ -44,7 +45,7 @@ export function AppHeader() {
   const router = useRouter();
   const { currency, setCurrency } = useCurrency();
   const { user } = useAuth();
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
 
   const handleLogout = async () => {
     await signOut(auth);
