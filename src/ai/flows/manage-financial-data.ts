@@ -10,9 +10,16 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {db} from '@/lib/firebase-admin';
+import * as admin from 'firebase-admin';
 import type {FinancialData} from '@/lib/types';
 import {initialFinancialData} from '@/lib/data';
+
+// Initialize Firebase Admin SDK if not already initialized
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
+
+const db = admin.firestore();
 
 const FinancialDataSchema = z.any();
 
