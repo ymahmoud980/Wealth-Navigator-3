@@ -5,16 +5,22 @@ import { getFirestore, type Firestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  "projectId": "wealth-navigator-ab3ww",
-  "appId": "1:814157293824:web:c4d1071e5871d120a76be5",
-  "storageBucket": "wealth-navigator-ab3ww.firebasestorage.app",
-  "apiKey": "AIzaSyAjVlNb3BDMnApRWhGLLJxaNFefARHmZR8",
-  "authDomain": "wealth-navigator-ab3ww.firebaseapp.com",
-  "messagingSenderId": "814157293824"
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 };
 
 // Initialize Firebase
-const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
+let app: FirebaseApp;
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApp();
+}
+
 const auth: Auth = getAuth(app);
 const db: Firestore = getFirestore(app);
 
