@@ -23,12 +23,12 @@ export const initialFinancialData: FinancialData = {
             { id: 're11', name: "Innovia Apt. 2", location: "Turkey", currentValue: 60000, currency: "USD", monthlyRent: 20000, rentCurrency: "TRY", rentDueDay: 1, rentFrequency: 'monthly', nextRentDueDate: '2025-09-01'},
         ],
         underDevelopment: [
-            { id: 'ud1', name: 'Nile Admin (A4719)', location: 'New Capital', purchasePrice: 2414450, currentValue: 2414450 * 1.5, currency: 'EGP', linkedInstallmentId: 'i1' },
-            { id: 'ud2', name: 'Nile Commercial (Co-A1050)', location: 'New Capital', purchasePrice: 8446984, currentValue: 8446984 * 1.5, currency: 'EGP', linkedInstallmentId: 'i2' },
-            { id: 'ud3', name: 'Tycoon H2222', location: 'New Capital', purchasePrice: 9487611, currentValue: 9487611 * 1.5, currency: 'EGP', linkedInstallmentId: 'i3' },
-            { id: 'ud4', name: 'Tycoon H2203', location: 'New Capital', purchasePrice: 10022052, currentValue: 10022052 * 1.5, currency: 'EGP', linkedInstallmentId: 'i4' },
-            { id: 'ud5', name: 'Nurai (NUI-11A1-23)', location: 'New Capital', purchasePrice: 4334550, currentValue: 4334550 * 1.5, currency: 'EGP', linkedInstallmentId: 'i5' },
-            { id: 'ud6', name: 'Dejoya Primero (S1/S-24)', location: 'New Capital', purchasePrice: 7875000, currentValue: 7875000 * 1.5, currency: 'EGP', linkedInstallmentId: 'i6' },
+            { id: 'ud1', name: 'Nile Admin (A4719)', location: 'New Capital', purchasePrice: 2414450, currentValue: 3621675, currency: 'EGP', linkedInstallmentId: 'i1' },
+            { id: 'ud2', name: 'Nile Commercial (Co-A1050)', location: 'New Capital', purchasePrice: 8446984, currentValue: 12670476, currency: 'EGP', linkedInstallmentId: 'i2' },
+            { id: 'ud3', name: 'Tycoon H2222', location: 'New Capital', purchasePrice: 9487611, currentValue: 14231416.5, currency: 'EGP', linkedInstallmentId: 'i3' },
+            { id: 'ud4', name: 'Tycoon H2203', location: 'New Capital', purchasePrice: 10022052, currentValue: 15033078, currency: 'EGP', linkedInstallmentId: 'i4' },
+            { id: 'ud5', name: 'Nurai (NUI-11A1-23)', location: 'New Capital', purchasePrice: 4334550, currentValue: 6501825, currency: 'EGP', linkedInstallmentId: 'i5' },
+            { id: 'ud6', name: 'Dejoya Primero (S1/S-24)', location: 'New Capital', purchasePrice: 7875000, currentValue: 11812500, currency: 'EGP', linkedInstallmentId: 'i6' },
         ],
         cash: [
             { id: 'c1', location: "Egypt", amount: 2323596, currency: "EGP" },
@@ -55,7 +55,7 @@ export const initialFinancialData: FinancialData = {
             { id: 'i3', project: "Tycoon H2222", developer: "Nile", total: 9487611, paid: 4053961, currency: "EGP", nextDueDate: "2025-09-01", amount: 776300, frequency: "Semi-Annual" },
             { id: 'i4', project: "Tycoon H2203", developer: "Nile", total: 10022052, paid: 4282205, currency: "EGP", nextDueDate: "2025-09-01", amount: 820000, frequency: "Semi-Annual" },
             { id: 'i5', project: "Nurai (NUI-11A1-23)", developer: "MERCON", total: 4334550, paid: 681640, currency: "EGP", nextDueDate: "2025-09-25", amount: 135593, frequency: "Quarterly" },
-            { id: 'i6', project: "Dejoya Primero (S1/S-24)", developer: "Taj Misr", total: 7875000, paid: 1181250, currency: "EGP", nextDueDate: "2025-08-17", amount: 157500, frequency: "Quarterly" },
+            { id: 'i6', project: "Dejoya Primero (S1/S-24)", developer: "Taj Misr", total: 7875000, paid: 1181250, currency: "EGP", nextDueDate: "2025-8-17", amount: 157500, frequency: "Quarterly" },
         ]
     },
     monthlyExpenses: {
@@ -64,5 +64,5 @@ export const initialFinancialData: FinancialData = {
             { id: 'he2', description: "Kuwait Household", amount: 350, currency: "KWD" }
         ]
     },
-    lastUpdated: null
+    lastUpdated: "2024-08-01T12:00:00.000Z"
 };
