@@ -16,19 +16,14 @@ import { UpcomingRents } from "@/components/dashboard/UpcomingRents";
 import { calculateMetrics } from "@/lib/calculations";
 import { useCurrency } from "@/hooks/use-currency";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
-import { useAuth } from "@/hooks/use-auth";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
   const { data, loading: dataLoading } = useFinancialData();
   const { currency } = useCurrency();
-  const { user, loading: authLoading } = useAuth();
   
   const metrics = calculateMetrics(data, currency);
-  const isLoading = dataLoading || authLoading;
 
-  if (isLoading) {
+  if (dataLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />

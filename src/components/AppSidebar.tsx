@@ -19,21 +19,11 @@ import {
   Wallet,
   BrainCircuit,
   Calculator,
-  LogOut,
   Settings,
-  X,
-  CircleAlert,
   FileText,
   Sparkles,
   HeartPulse,
-  LogIn,
 } from "lucide-react";
-import { Button } from "./ui/button";
-import { useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
-import { signOut } from "firebase/auth";
-import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: <LayoutDashboard /> },
@@ -49,14 +39,6 @@ const navItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const [showIssue, setShowIssue] = useState(true);
-  const { user } = useAuth();
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/login');
-  }
 
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -109,41 +91,6 @@ export function AppSidebar() {
                   <span>Settings</span>
                 </SidebarMenuButton>
               </Link>
-            </SidebarMenuItem>
-            
-            {showIssue && (
-              <SidebarMenuItem>
-                <div className="flex items-center justify-between w-full text-sm font-medium text-destructive-foreground bg-destructive rounded-md p-2 group-data-[collapsible=icon]:hidden">
-                    <div className="flex items-center gap-2">
-                        <CircleAlert className="h-4 w-4" />
-                        <span>1 issue</span>
-                    </div>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-destructive/80" onClick={() => setShowIssue(false)}>
-                        <X className="h-4 w-4" />
-                    </Button>
-                </div>
-                <div className="hidden group-data-[collapsible=icon]:block">
-                    <SidebarMenuButton tooltip={{ children: '1 issue' }} className="bg-destructive text-destructive-foreground hover:bg-destructive/80 focus:bg-destructive/80 active:bg-destructive/80">
-                        <CircleAlert />
-                    </SidebarMenuButton>
-                </div>
-              </SidebarMenuItem>
-            )}
-            
-            <SidebarMenuItem>
-              {user ? (
-                <SidebarMenuButton tooltip={{ children: 'Logout' }} onClick={handleLogout}>
-                  <LogOut />
-                  <span>Logout</span>
-                </SidebarMenuButton>
-              ) : (
-                <Link href="/login">
-                  <SidebarMenuButton tooltip={{ children: 'Login' }} isActive={pathname === '/login'}>
-                    <LogIn />
-                    <span>Login</span>
-                  </SidebarMenuButton>
-                </Link>
-              )}
             </SidebarMenuItem>
          </SidebarMenu>
       </SidebarFooter>

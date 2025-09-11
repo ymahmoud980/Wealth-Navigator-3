@@ -1,8 +1,7 @@
 
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Select,
@@ -11,21 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrency } from "@/hooks/use-currency";
 import type { Currency } from "@/lib/types";
-import { useAuth } from "@/hooks/use-auth";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 
 const pageTitles: { [key: string]: string } = {
   "/": "Dashboard",
@@ -37,20 +23,12 @@ const pageTitles: { [key: string]: string } = {
   "/calculator": "Currency Calculator",
   "/breakdown": "Calculation Breakdown",
   "/health": "Financial Health Analysis",
-  "/login": "Login",
 };
 
 export function AppHeader() {
   const pathname = usePathname();
-  const router = useRouter();
   const { currency, setCurrency } = useCurrency();
-  const { user } = useAuth();
   
-  const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/login');
-  }
-
   const title = pageTitles[pathname] || "Wealth Navigator";
 
   return (
@@ -72,28 +50,6 @@ export function AppHeader() {
             <SelectItem value="TRY">TRY</SelectItem>
           </SelectContent>
         </Select>
-        {user ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={user.photoURL || "https://picsum.photos/100"} alt="User" data-ai-hint="profile picture" />
-                  <AvatarFallback>{user.email?.substring(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem disabled>Profile</DropdownMenuItem>
-              <DropdownMenuItem disabled>Settings</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-           pathname !== '/login' && <Button asChild><Link href="/login">Login</Link></Button>
-        )}
       </div>
     </header>
   );
