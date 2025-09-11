@@ -13,6 +13,7 @@ const firebaseConfig = {
   "messagingSenderId": "814157293824"
 };
 
+
 // Initialize Firebase
 let app: FirebaseApp;
 if (!getApps().length) {

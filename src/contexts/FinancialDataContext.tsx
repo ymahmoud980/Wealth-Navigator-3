@@ -22,8 +22,6 @@ export function FinancialDataProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  const db = getFirebaseDb();
-
   useEffect(() => {
     if (authLoading) {
       setLoading(true);
@@ -36,6 +34,7 @@ export function FinancialDataProvider({ children }: { children: ReactNode }) {
     }
 
     setLoading(true);
+    const db = getFirebaseDb();
     const docRef = doc(db, 'users', user.uid);
 
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
@@ -58,12 +57,13 @@ export function FinancialDataProvider({ children }: { children: ReactNode }) {
 
     return () => unsubscribe();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, authLoading, db]);
+  }, [user, authLoading]);
 
   const setData = async (newData: FinancialData) => {
     setDataState(newData); // Optimistic update
     if (user) {
       setIsSaving(true);
+      const db = getFirebaseDb();
       const docRef = doc(db, 'users', user.uid);
       try {
         await setDoc(docRef, newData, { merge: true });

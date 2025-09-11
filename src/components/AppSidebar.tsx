@@ -31,7 +31,7 @@ import {
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { getAuth, signOut } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { getFirebaseAuth } from "@/lib/firebase";
 
@@ -51,10 +51,10 @@ export function AppSidebar() {
   const pathname = usePathname();
   const [showIssue, setShowIssue] = useState(true);
   const { user } = useAuth();
-  const auth = getFirebaseAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
+    const auth = getFirebaseAuth();
     await signOut(auth);
     router.push('/login');
   }

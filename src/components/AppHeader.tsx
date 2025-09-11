@@ -45,9 +45,9 @@ export function AppHeader() {
   const router = useRouter();
   const { currency, setCurrency } = useCurrency();
   const { user } = useAuth();
-  const auth = getFirebaseAuth();
-
+  
   const handleLogout = async () => {
+    const auth = getFirebaseAuth();
     await signOut(auth);
     router.push('/login');
   }

@@ -40,10 +40,9 @@ export default function LoginPage() {
     defaultValues: { email: "", password: "" },
   });
 
-  const auth = getFirebaseAuth();
-
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);
+    const auth = getFirebaseAuth();
     try {
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, values.email, values.password);

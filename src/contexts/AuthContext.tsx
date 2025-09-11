@@ -15,16 +15,16 @@ export const AuthContext = createContext<AuthContextType>({ user: null, loading:
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const auth = getFirebaseAuth();
 
   useEffect(() => {
+    const auth = getFirebaseAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [auth]);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, loading }}>
