@@ -7,7 +7,6 @@ import { AppHeader } from '@/components/AppHeader';
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
 import { FinancialDataProvider } from '@/contexts/FinancialDataContext';
 import { Toaster } from "@/components/ui/toaster";
-import { ServiceWorker } from '@/components/ServiceWorker';
 
 export const metadata: Metadata = {
   title: 'Wealth Navigator',
@@ -48,7 +47,6 @@ export default function RootLayout({
             </FinancialDataProvider>
           </CurrencyProvider>
         <Toaster />
-        <ServiceWorker />
       </body>
     </html>
   );
