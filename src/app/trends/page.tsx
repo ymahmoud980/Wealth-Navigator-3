@@ -16,12 +16,17 @@ export default function TrendsPage() {
   const chartData = useMemo(() => 
     (data.history || [])
       .map(entry => ({
-        date: formatDate(new Date(entry.date), 'MMM d, yyyy'),
+        ...entry, // Pass original entry through
+        date: new Date(entry.date), // Keep it as a Date object for sorting
+      }))
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .map(entry => ({
+        // Format the date for display after sorting
+        date: formatDate(entry.date, 'MMM d, yyyy'),
         "Net Worth": entry.netWorth,
         "Total Assets": entry.totalAssets,
         "Total Liabilities": entry.totalLiabilities,
-      }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+      })),
     [data.history]
   );
 
@@ -66,7 +71,7 @@ export default function TrendsPage() {
           {chartData.length > 1 ? (
              <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData}>
+                    <LineChart data={chartData} margin={{ top: 5, right: 20, left: 30, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="date" />
                         <YAxis tickFormatter={(value) => format(value).replace(/[^0-9.,-]/g, '')}/>
