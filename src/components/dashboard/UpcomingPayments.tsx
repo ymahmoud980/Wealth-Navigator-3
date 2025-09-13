@@ -2,20 +2,17 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useCurrency } from '@/hooks/use-currency';
 import { cn } from '@/lib/utils';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Installment } from '@/lib/types';
-import { Checkbox } from "@/components/ui/checkbox";
-import { useFinancialData } from "@/contexts/FinancialDataContext";
-import { addMonths, addYears, format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 interface UpcomingPaymentsProps {
     payments: Installment[];
 }
 
 export function UpcomingPayments({ payments: initialPayments }: UpcomingPaymentsProps) {
-  const { data, setData } = useFinancialData();
   
   const getStatus = (dueDate: string) => {
       const today = new Date();
@@ -30,27 +27,6 @@ export function UpcomingPayments({ payments: initialPayments }: UpcomingPayments
       if (diffDays <= 90) return { className: 'text-yellow-600', text: `${diffDays} days away` };
       return { className: 'text-gray-500', text: `${diffDays} days away` };
   }
-
-  const handleMarkAsPaid = (paymentToMark: Installment) => {
-    const updatedData = JSON.parse(JSON.stringify(data));
-    const installment = updatedData.liabilities.installments.find((p: Installment) => p.id === paymentToMark.id);
-
-    if (installment) {
-      installment.paid += installment.amount;
-      
-      let nextDate = new Date(installment.nextDueDate.split('-').map((p:string) => parseInt(p, 10))[0], installment.nextDueDate.split('-').map((p:string) => parseInt(p, 10))[1]-1, installment.nextDueDate.split('-').map((p:string) => parseInt(p, 10))[2]);
-      if (installment.frequency === 'Quarterly') {
-        nextDate = addMonths(nextDate, 3);
-      } else if (installment.frequency === 'Semi-Annual') {
-        nextDate = addMonths(nextDate, 6);
-      } else if (installment.frequency === 'Annual') {
-        nextDate = addYears(nextDate, 1);
-      }
-      installment.nextDueDate = format(nextDate, 'yyyy-MM-dd');
-      
-      setData(updatedData);
-    }
-  };
   
   const sortedPayments = [...initialPayments].sort((a, b) => {
     const dateA = a.nextDueDate.split('-').map(Number);
@@ -61,29 +37,27 @@ export function UpcomingPayments({ payments: initialPayments }: UpcomingPayments
   return (
     <>
       <Card>
-        <CardHeader>
-          <CardTitle>Upcoming Installments</CardTitle>
-          <CardDescription>Next project installments due. Check to mark as paid.</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Upcoming Installments</CardTitle>
+            <CardDescription>A summary of your next project installments due.</CardDescription>
+          </div>
+           <Button asChild variant="outline" size="sm">
+                <Link href="/liabilities">
+                    View All
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+            </Button>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[200px]">
             <div className="space-y-4">
               {sortedPayments.length > 0 ? (
                 sortedPayments.map((payment) => {
                   const status = getStatus(payment.nextDueDate);
                   const isPaid = payment.paid >= payment.total;
+                  if (isPaid) return null;
                   return (
                   <div key={payment.id} className="flex items-center gap-4">
-                    <Checkbox
-                      id={`payment-${payment.id}`}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                            handleMarkAsPaid(payment);
-                        }
-                      }}
-                      checked={false} // Always start unchecked
-                      disabled={isPaid}
-                    />
                     <div className={cn("flex-1 grid grid-cols-3 gap-2 items-center text-sm")}>
                       <div className="col-span-2">
                           <p className="font-medium truncate">{payment.project}</p>
@@ -97,7 +71,6 @@ export function UpcomingPayments({ payments: initialPayments }: UpcomingPayments
                 <p className="text-sm text-muted-foreground text-center py-8">All payments cleared!</p>
               )}
             </div>
-          </ScrollArea>
         </CardContent>
       </Card>
     </>
