@@ -21,7 +21,10 @@ export function UpcomingPayments({ payments: initialPayments }: UpcomingPayments
   
   const getStatus = (dueDate: string) => {
       const today = new Date();
-      const due = new Date(dueDate);
+      // Handle non-standard date formats
+      const dateParts = dueDate.split('-').map(part => parseInt(part, 10));
+      const due = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+
       const diffDays = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
       
       if (diffDays < 0) return { className: 'text-red-700', text: `Overdue by ${-diffDays} days` };
