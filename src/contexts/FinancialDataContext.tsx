@@ -14,7 +14,7 @@ interface FinancialDataContextType {
 const FinancialDataContext = createContext<FinancialDataContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = 'financialData';
-const CORRECTION_FLAG_KEY = 'tycoon-h2222-correction-applied';
+const CORRECTION_FLAG_KEY = 'tycoon-h2222-sept-2026-correction';
 
 // This function performs a one-time correction on the user's saved data.
 const applyOneTimeCorrection = (data: FinancialData): FinancialData => {
@@ -24,26 +24,31 @@ const applyOneTimeCorrection = (data: FinancialData): FinancialData => {
       return data;
     }
 
-    const installments = data.liabilities.installments;
+    const correctedData = JSON.parse(JSON.stringify(data)); // Deep copy
+    const installments = correctedData.liabilities.installments as Installment[];
     const tycoonH2222Index = installments.findIndex(i => i.id === 'i3');
 
     if (tycoonH2222Index !== -1) {
-      // These are the original values for Tycoon H2222
-      const originalPaid = 4053961;
-      const originalNextDueDate = "2025-09-01";
-      
-      const currentInstallment = installments[tycoonH2222Index];
+        // These are the original values for Tycoon H2222
+        const originalTotal = 9487611;
+        const installmentAmount = 776300;
+        
+        // The state should reflect that two payments were made from the original `paid` amount.
+        // Original paid was 4053961. We need to revert it to the state *before* the last mistaken click.
+        // The state before the last click would have been one payment made.
+        const correctPaidAmount = 4053961 + installmentAmount;
+        const correctNextDueDate = "2026-09-01";
+        
+        const currentInstallment = installments[tycoonH2222Index];
 
-      // Only apply correction if it seems to have been accidentally advanced
-      if (currentInstallment.paid > originalPaid) {
-          currentInstallment.paid = originalPaid;
-          currentInstallment.nextDueDate = originalNextDueDate;
-          console.log("Applied one-time correction for Tycoon H2222.");
-      }
+        // We set it to the state representing the payment due on Sep 1, 2026.
+        currentInstallment.paid = correctPaidAmount;
+        currentInstallment.nextDueDate = correctNextDueDate;
+        console.log(`Applied one-time correction for Tycoon H2222 to set next due date to ${correctNextDueDate}.`);
     }
     
     localStorage.setItem(CORRECTION_FLAG_KEY, 'true');
-    return data;
+    return correctedData;
     
   } catch (error) {
     console.error("Error applying one-time data correction:", error);
