@@ -11,7 +11,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCurrency } from "@/hooks/use-currency";
-import type { Currency } from "@/lib/types";
+import type { Currency, FinancialData } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Upload, Download } from "lucide-react";
+import { useFinancialData } from "@/contexts/FinancialDataContext";
+import { useToast } from "@/hooks/use-toast";
+import { useRef } from "react";
 
 const pageTitles: { [key: string]: string } = {
   "/": "Dashboard",
@@ -28,8 +33,67 @@ const pageTitles: { [key: string]: string } = {
 export function AppHeader() {
   const pathname = usePathname();
   const { currency, setCurrency } = useCurrency();
+  const { data, setData } = useFinancialData();
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const title = pageTitles[pathname] || "Wealth Navigator";
+
+  const handleExport = () => {
+    const jsonData = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonData], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `wealth-navigator-data-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast({
+      title: "Data Exported",
+      description: "Your financial data has been saved to your downloads.",
+    });
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result;
+        if (typeof text !== 'string') {
+            throw new Error("File is not valid text");
+        }
+        const importedData = JSON.parse(text);
+        // Basic validation can be done here if needed
+        setData(importedData as FinancialData);
+        toast({
+          title: "Import Successful",
+          description: "Your financial data has been loaded.",
+        });
+      } catch (error) {
+        console.error("Failed to import data:", error);
+        toast({
+          title: "Import Failed",
+          description: "The selected file is not valid JSON.",
+          variant: "destructive",
+        });
+      }
+    };
+    reader.readAsText(file);
+    // Reset file input to allow importing the same file again
+    if(event.target) {
+        event.target.value = '';
+    }
+  };
+
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
@@ -38,7 +102,22 @@ export function AppHeader() {
       </div>
       <h1 className="text-xl font-semibold md:text-2xl">{title}</h1>
 
-      <div className="ml-auto flex items-center gap-4">
+      <div className="ml-auto flex items-center gap-2">
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          onChange={handleFileImport}
+          accept="application/json"
+        />
+        <Button variant="outline" size="sm" onClick={handleImportClick}>
+          <Upload className="mr-2 h-4 w-4" />
+          Import
+        </Button>
+         <Button variant="outline" size="sm" onClick={handleExport}>
+          <Download className="mr-2 h-4 w-4" />
+          Export
+        </Button>
         <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
           <SelectTrigger className="w-[100px]">
             <SelectValue placeholder="Currency" />
