@@ -32,7 +32,10 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div 
+      className="flex flex-col gap-8 bg-cover bg-center p-4 md:p-6 lg:p-8 rounded-xl -m-4"
+      style={{backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')"}}
+    >
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Net Worth" value={metrics.netWorth} icon={<DollarSign className="text-primary" />} isCurrency={true} />
         <StatCard title="Asset Value" value={metrics.totalAssets} icon={<TrendingUp className="text-green-500" />} isCurrency={true} />
