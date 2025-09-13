@@ -7,17 +7,23 @@ import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, L
 import { useCurrency } from "@/hooks/use-currency";
 import { format as formatDate } from 'date-fns';
 import { AreaChart } from "lucide-react";
+import { useMemo } from "react";
 
 export default function TrendsPage() {
   const { data } = useFinancialData();
   const { format } = useCurrency();
 
-  const chartData = (data.history || []).map(entry => ({
-    date: formatDate(new Date(entry.date), 'MMM d, yyyy'),
-    "Net Worth": entry.netWorth,
-    "Total Assets": entry.totalAssets,
-    "Total Liabilities": entry.totalLiabilities,
-  })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const chartData = useMemo(() => 
+    (data.history || [])
+      .map(entry => ({
+        date: formatDate(new Date(entry.date), 'MMM d, yyyy'),
+        "Net Worth": entry.netWorth,
+        "Total Assets": entry.totalAssets,
+        "Total Liabilities": entry.totalLiabilities,
+      }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+    [data.history]
+  );
 
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -63,7 +69,7 @@ export default function TrendsPage() {
                     <LineChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="date" />
-                        <YAxis tickFormatter={(value) => format(value).replace(/[^0-9-]/g, '') + 'K'} />
+                        <YAxis tickFormatter={(value) => format(value).replace(/[^0-9.,-]/g, '')}/>
                         <Tooltip content={<CustomTooltip />} />
                         <Legend />
                         <Line type="monotone" dataKey="Net Worth" stroke="hsl(var(--primary))" strokeWidth={2} activeDot={{ r: 8 }} />

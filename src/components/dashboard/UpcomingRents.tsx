@@ -2,35 +2,16 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useCurrency } from '@/hooks/use-currency';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { RealEstateAsset } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { useFinancialData } from '@/contexts/FinancialDataContext';
 
 interface UpcomingRentsProps {
     rents: RealEstateAsset[];
 }
 
 export function UpcomingRents({ rents: initialRents }: UpcomingRentsProps) {
-  const { data, setData } = useFinancialData();
-
-  const handleCheckChange = (id: string) => {
-    const newData = JSON.parse(JSON.stringify(data));
-    const property = newData.assets.realEstate.find((r: RealEstateAsset) => r.id === id);
-    if (property) {
-      const currentDueDate = new Date(property.nextRentDueDate);
-      if (property.rentFrequency === 'monthly') {
-          currentDueDate.setMonth(currentDueDate.getMonth() + 1);
-      } else if (property.rentFrequency === 'semi-annual') {
-          currentDueDate.setMonth(currentDueDate.getMonth() + 6);
-      }
-      property.nextRentDueDate = currentDueDate.toISOString().split('T')[0];
-      setData(newData);
-    }
-  };
   
    const getStatus = (dueDate: string) => {
       const today = new Date();
@@ -58,10 +39,6 @@ export function UpcomingRents({ rents: initialRents }: UpcomingRentsProps) {
                   const status = getStatus(rent.nextRentDueDate);
                   return (
                     <div key={rent.id} className="flex items-center gap-4">
-                      <Checkbox
-                        id={`rent-${rent.id}`}
-                        onCheckedChange={() => handleCheckChange(rent.id)}
-                      />
                       <div className="flex-1 grid grid-cols-3 gap-2 items-center text-sm">
                         <div className='col-span-2'>
                             <p className="font-medium truncate">{rent.name}</p>

@@ -1,9 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useCurrency } from '@/hooks/use-currency';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -15,27 +13,6 @@ interface UpcomingPaymentsProps {
 }
 
 export function UpcomingPayments({ payments: initialPayments }: UpcomingPaymentsProps) {
-  const { data, setData } = useFinancialData();
-
-  const handleCheckChange = (id: string) => {
-    // In a real app, this would trigger a database update.
-    // For now, we'll just update the state.
-    const newData = JSON.parse(JSON.stringify(data));
-    const installment = newData.liabilities.installments.find((i: Installment) => i.id === id);
-    if (installment) {
-      const currentDueDate = new Date(installment.nextDueDate);
-      if (installment.frequency === 'Annual') {
-        currentDueDate.setFullYear(currentDueDate.getFullYear() + 1);
-      } else if (installment.frequency === 'Semi-Annual') {
-        currentDueDate.setMonth(currentDueDate.getMonth() + 6);
-      } else if (installment.frequency === 'Quarterly') {
-        currentDueDate.setMonth(currentDueDate.getMonth() + 3);
-      }
-      installment.paid += installment.amount;
-      installment.nextDueDate = currentDueDate.toISOString().split('T')[0];
-      setData(newData);
-    }
-  };
   
   const getStatus = (dueDate: string) => {
       const today = new Date();
@@ -64,10 +41,6 @@ export function UpcomingPayments({ payments: initialPayments }: UpcomingPayments
                 const status = getStatus(payment.nextDueDate);
                 return (
                 <div key={payment.id} className="flex items-center gap-4">
-                  <Checkbox
-                    id={`payment-${payment.id}`}
-                    onCheckedChange={() => handleCheckChange(payment.id)}
-                  />
                   <div className={cn("flex-1 grid grid-cols-3 gap-2 items-center text-sm")}>
                     <div className="col-span-2">
                         <p className="font-medium truncate">{payment.project}</p>
