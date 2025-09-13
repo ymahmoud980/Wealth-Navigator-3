@@ -55,7 +55,7 @@ export const initialFinancialData: FinancialData = {
             { id: 'i3', project: "Tycoon H2222", developer: "Nile", total: 9487611, paid: 4053961, currency: "EGP", nextDueDate: "2025-09-01", amount: 776300, frequency: "Semi-Annual" },
             { id: 'i4', project: "Tycoon H2203", developer: "Nile", total: 10022052, paid: 4282205, currency: "EGP", nextDueDate: "2025-09-01", amount: 820000, frequency: "Semi-Annual" },
             { id: 'i5', project: "Nurai (NUI-11A1-23)", developer: "MERCON", total: 4334550, paid: 681640, currency: "EGP", nextDueDate: "2025-09-25", amount: 135593, frequency: "Quarterly" },
-            { id: 'i6', project: "Dejoya Primero (S1/S-24)", developer: "Taj Misr", total: 7875000, paid: 1181250, currency: "EGP", nextDueDate: "2025-8-17", amount: 157500, frequency: "Quarterly" },
+            { id: 'i6', project: "Dejoya Primero (S1/S-24)", developer: "Taj Misr", total: 7875000, paid: 1181250, currency: "EGP", nextDueDate: "2025-08-17", amount: 157500, frequency: "Quarterly" },
         ]
     },
     monthlyExpenses: {

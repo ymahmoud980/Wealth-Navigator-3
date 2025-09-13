@@ -1,24 +1,15 @@
 
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { RealEstateAsset } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { format, addMonths, addYears } from 'date-fns';
+import { format, addMonths } from 'date-fns';
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "../ui/button";
 
 interface UpcomingRentsProps {
     rents: RealEstateAsset[];
@@ -26,7 +17,7 @@ interface UpcomingRentsProps {
 
 export function UpcomingRents({ rents: initialRents }: UpcomingRentsProps) {
   const { data, setData } = useFinancialData();
-  const [rentToReceive, setRentToReceive] = useState<RealEstateAsset | null>(null);
+  const { toast } = useToast();
 
   const getStatus = (dueDate: string) => {
       const today = new Date();
@@ -38,8 +29,9 @@ export function UpcomingRents({ rents: initialRents }: UpcomingRentsProps) {
       return { className: 'text-gray-500', text: `Due in ${diffDays} days` };
   }
 
-  const handleMarkAsReceived = () => {
-    if (!rentToReceive) return;
+  const handleMarkAsReceived = (rentToReceive: RealEstateAsset) => {
+    const originalData = JSON.parse(JSON.stringify(data)); // Deep copy for undo
+    
     const updatedData = { ...data };
     const rentAsset = updatedData.assets.realEstate.find(r => r.id === rentToReceive.id);
 
@@ -52,8 +44,20 @@ export function UpcomingRents({ rents: initialRents }: UpcomingRentsProps) {
       }
       rentAsset.nextRentDueDate = format(nextDate, 'yyyy-MM-dd');
       setData(updatedData);
+
+      toast({
+        title: "Rent Received",
+        description: `Marked rent for ${rentAsset.name} as received.`,
+        action: (
+           <Button variant="secondary" size="sm" onClick={() => {
+            setData(originalData);
+            toast({ description: "Action undone." });
+          }}>
+            Undo
+          </Button>
+        )
+      });
     }
-    setRentToReceive(null);
   };
   
   const sortedRents = [...initialRents].filter(r => r.monthlyRent > 0).sort((a,b) => new Date(a.nextRentDueDate).getTime() - new Date(b.nextRentDueDate).getTime());
@@ -75,7 +79,12 @@ export function UpcomingRents({ rents: initialRents }: UpcomingRentsProps) {
                       <div key={rent.id} className="flex items-center gap-4">
                         <Checkbox
                           id={`rent-${rent.id}`}
-                          onCheckedChange={() => setRentToReceive(rent)}
+                          onCheckedChange={(checked) => {
+                             if(checked) {
+                                handleMarkAsReceived(rent);
+                             }
+                          }}
+                           checked={false} // Always start unchecked
                         />
                         <div className="flex-1 grid grid-cols-3 gap-2 items-center text-sm">
                           <div className='col-span-2'>
@@ -97,20 +106,6 @@ export function UpcomingRents({ rents: initialRents }: UpcomingRentsProps) {
           </ScrollArea>
         </CardContent>
       </Card>
-      <AlertDialog open={!!rentToReceive} onOpenChange={() => setRentToReceive(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Rent Received</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to mark the rent for **{rentToReceive?.name}** as received and advance the next due date?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleMarkAsReceived}>Confirm</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

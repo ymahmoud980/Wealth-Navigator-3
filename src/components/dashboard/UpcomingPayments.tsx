@@ -1,24 +1,15 @@
 
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCurrency } from '@/hooks/use-currency';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Installment } from '@/lib/types';
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "../ui/button";
 
 interface UpcomingPaymentsProps {
     payments: Installment[];
@@ -26,7 +17,7 @@ interface UpcomingPaymentsProps {
 
 export function UpcomingPayments({ payments: initialPayments }: UpcomingPaymentsProps) {
   const { data, setData } = useFinancialData();
-  const [paymentToMark, setPaymentToMark] = useState<Installment | null>(null);
+  const { toast } = useToast();
   
   const getStatus = (dueDate: string) => {
       const today = new Date();
@@ -39,19 +30,29 @@ export function UpcomingPayments({ payments: initialPayments }: UpcomingPayments
       return { className: 'text-gray-500', text: `${diffDays} days away` };
   }
 
-  const handleMarkAsPaid = () => {
-    if (!paymentToMark) return;
-
+  const handleMarkAsPaid = (paymentToMark: Installment) => {
+    const originalData = JSON.parse(JSON.stringify(data)); // Deep copy for undo
+    
     const updatedData = { ...data };
     const installment = updatedData.liabilities.installments.find(p => p.id === paymentToMark.id);
 
     if (installment) {
       installment.paid += installment.amount;
-      // You might want to update nextDueDate here as well, e.g., by adding the frequency interval.
-      // For now, we'll just update the paid amount.
       setData(updatedData);
+
+      toast({
+        title: "Installment Paid",
+        description: `Marked payment for ${installment.project} as paid.`,
+        action: (
+          <Button variant="secondary" size="sm" onClick={() => {
+            setData(originalData);
+            toast({ description: "Action undone." });
+          }}>
+            Undo
+          </Button>
+        ),
+      });
     }
-    setPaymentToMark(null);
   };
   
   const sortedPayments = [...initialPayments].sort((a,b) => new Date(a.nextDueDate).getTime() - new Date(b.nextDueDate).getTime());
@@ -69,12 +70,18 @@ export function UpcomingPayments({ payments: initialPayments }: UpcomingPayments
               {sortedPayments.length > 0 ? (
                 sortedPayments.map((payment) => {
                   const status = getStatus(payment.nextDueDate);
+                  const isPaid = payment.paid >= payment.total;
                   return (
                   <div key={payment.id} className="flex items-center gap-4">
                     <Checkbox
                       id={`payment-${payment.id}`}
-                      onCheckedChange={() => setPaymentToMark(payment)}
-                      disabled={payment.paid >= payment.total}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                            handleMarkAsPaid(payment);
+                        }
+                      }}
+                      checked={false} // Always start unchecked
+                      disabled={isPaid}
                     />
                     <div className={cn("flex-1 grid grid-cols-3 gap-2 items-center text-sm")}>
                       <div className="col-span-2">
@@ -92,20 +99,6 @@ export function UpcomingPayments({ payments: initialPayments }: UpcomingPayments
           </ScrollArea>
         </CardContent>
       </Card>
-      <AlertDialog open={!!paymentToMark} onOpenChange={() => setPaymentToMark(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Payment</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to mark the installment for **{paymentToMark?.project}** of **{paymentToMark?.amount.toLocaleString()} {paymentToMark?.currency}** as paid? This action cannot be easily undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleMarkAsPaid}>Confirm</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }
