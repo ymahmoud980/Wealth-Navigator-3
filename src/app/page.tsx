@@ -40,22 +40,20 @@ export default function DashboardPage() {
         <StatCard title="Avg. Net Cash Flow" value={metrics.netCashFlow} icon={<ArrowRightLeft className="text-blue-500" />} isCurrency={true} />
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-5">
-        <Card className="lg:col-span-2">
+      <div className="grid gap-8 lg:grid-cols-2">
+          <UpcomingPayments />
+          <UpcomingRents rents={data.assets.realEstate} />
+      </div>
+
+       <Card>
           <CardHeader>
             <CardTitle>Asset Allocation</CardTitle>
-            <CardDescription>How your assets are distributed.</CardDescription>
+            <CardDescription>How your assets are distributed across different categories.</CardDescription>
           </CardHeader>
           <CardContent>
             <AssetAllocationChart assetsBreakdown={metrics.assets} totalAssets={metrics.totalAssets} />
           </CardContent>
         </Card>
-
-        <div className="lg:col-span-3 grid gap-8">
-          <UpcomingPayments payments={data.liabilities.installments} />
-          <UpcomingRents rents={data.assets.realEstate} />
-        </div>
-      </div>
     </div>
   );
 }
