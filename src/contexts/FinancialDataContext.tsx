@@ -14,7 +14,7 @@ interface FinancialDataContextType {
 const FinancialDataContext = createContext<FinancialDataContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = 'financialData';
-const CORRECTION_FLAG_KEY = 'tycoon-h2222-march-2026-correction';
+const CORRECTION_FLAG_KEY = 'tycoon-h2222-march-2026-correction-final';
 
 // This function performs a one-time correction on the user's saved data.
 const applyOneTimeCorrection = (data: FinancialData): FinancialData => {
@@ -32,12 +32,12 @@ const applyOneTimeCorrection = (data: FinancialData): FinancialData => {
         const currentInstallment = installments[tycoonH2222Index];
         
         // This state represents that the installment due on March 1, 2026 is the next one to be paid.
-        const correctPaidAmount = 3277661;
+        const correctPaidAmount = 4053961;
         const correctNextDueDate = "2026-03-01";
 
         currentInstallment.paid = correctPaidAmount;
         currentInstallment.nextDueDate = correctNextDueDate;
-        console.log(`Applied one-time correction for Tycoon H2222 to set next due date to ${correctNextDueDate}.`);
+        console.log(`Applied one-time correction for Tycoon H2222 to set paid amount to ${correctPaidAmount} and next due date to ${correctNextDueDate}.`);
     }
     
     localStorage.setItem(CORRECTION_FLAG_KEY, 'true');
