@@ -33,8 +33,8 @@ export function UpcomingPayments({ payments: initialPayments }: UpcomingPayments
   const handleMarkAsPaid = (paymentToMark: Installment) => {
     const originalData = JSON.parse(JSON.stringify(data)); // Deep copy for undo
     
-    const updatedData = { ...data };
-    const installment = updatedData.liabilities.installments.find(p => p.id === paymentToMark.id);
+    const updatedData = JSON.parse(JSON.stringify(data));
+    const installment = updatedData.liabilities.installments.find((p: Installment) => p.id === paymentToMark.id);
 
     if (installment) {
       installment.paid += installment.amount;

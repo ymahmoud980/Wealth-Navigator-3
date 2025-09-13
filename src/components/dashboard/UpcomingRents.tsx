@@ -32,8 +32,8 @@ export function UpcomingRents({ rents: initialRents }: UpcomingRentsProps) {
   const handleMarkAsReceived = (rentToReceive: RealEstateAsset) => {
     const originalData = JSON.parse(JSON.stringify(data)); // Deep copy for undo
     
-    const updatedData = { ...data };
-    const rentAsset = updatedData.assets.realEstate.find(r => r.id === rentToReceive.id);
+    const updatedData = JSON.parse(JSON.stringify(data));
+    const rentAsset = updatedData.assets.realEstate.find((r: RealEstateAsset) => r.id === rentToReceive.id);
 
     if (rentAsset) {
       let nextDate = new Date(rentAsset.nextRentDueDate);
