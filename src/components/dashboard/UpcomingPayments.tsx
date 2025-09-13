@@ -4,9 +4,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from '@/lib/utils';
 import type { Installment } from '@/lib/types';
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { addMonths, addYears, format, isValid, parse } from "date-fns";
@@ -89,17 +86,11 @@ export function UpcomingPayments({ payments: initialPayments }: UpcomingPayments
             <CardTitle>Upcoming Installments</CardTitle>
             <CardDescription>A summary of your next project installments due.</CardDescription>
           </div>
-           <Button asChild variant="outline" size="sm">
-                <Link href="/liabilities">
-                    View All
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-            </Button>
         </CardHeader>
         <CardContent>
             <div className="space-y-4">
               {sortedPayments.length > 0 ? (
-                sortedPayments.map((payment) => {
+                sortedPayments.slice(0, 5).map((payment) => {
                   const status = getStatus(payment.nextDueDate);
                   const isChecked = false; // Checkbox is always initially unchecked
                   return (
