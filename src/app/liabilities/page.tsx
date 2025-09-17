@@ -136,16 +136,29 @@ export default function LiabilitiesPage() {
     reader.readAsDataURL(file);
     reader.onload = () => {
       const dataUri = reader.result as string;
-      const updatedData = { ...data };
-      const installmentIndex = updatedData.liabilities.installments.findIndex(i => i.id === uploadTargetId);
-      if (installmentIndex !== -1) {
-        updatedData.liabilities.installments[installmentIndex].paymentPlanDataUri = dataUri;
-        setData(updatedData);
-        toast({
-          title: "Upload Successful",
-          description: `Payment plan for ${updatedData.liabilities.installments[installmentIndex].project} has been saved.`,
-        });
+
+      const updateInstallment = (d: FinancialData) => {
+          const newData = JSON.parse(JSON.stringify(d));
+          const installment = newData.liabilities.installments.find((i: Installment) => i.id === uploadTargetId);
+          if (installment) {
+              installment.paymentPlanDataUri = dataUri;
+          }
+          return newData;
       }
+
+      const updatedMainData = updateInstallment(data);
+      setData(updatedMainData);
+      
+      if (isEditing) {
+          const updatedEditableData = updateInstallment(editableData);
+          setEditableData(updatedEditableData);
+      }
+
+      toast({
+        title: "Upload Successful",
+        description: `Payment plan has been saved.`,
+      });
+      
       setUploadTargetId(null);
       if(event.target) event.target.value = '';
     };
@@ -227,8 +240,7 @@ export default function LiabilitiesPage() {
                  </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {installments.map(p => {
-                      const savedInstallment = data.liabilities.installments.find(i => i.id === p.id);
-                      const paymentPlanDataUri = savedInstallment?.paymentPlanDataUri;
+                      const paymentPlanDataUri = p.paymentPlanDataUri;
                       const progress = (p.paid / p.total) * 100;
                       const remaining = p.total - p.paid;
                       const dateParts = p.nextDueDate.split('-').map(part => parseInt(part, 10));
@@ -248,7 +260,7 @@ export default function LiabilitiesPage() {
                               <div className="flex items-center gap-2">
                                 {paymentPlanDataUri && (
                                   <Button variant="outline" size="sm" onClick={() => window.open(paymentPlanDataUri, '_blank')}>
-                                    <Eye className="h-4 w-4 mr-1"/> View Plan
+                                    <Eye className="h-4 w-4 mr-1"/> View
                                   </Button>
                                 )}
                                 <Button variant="outline" size="sm" onClick={() => handleUploadClick(p.id)}>
@@ -360,3 +372,5 @@ export default function LiabilitiesPage() {
     </>
   )
 }
+
+    
