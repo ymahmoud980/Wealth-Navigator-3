@@ -227,6 +227,8 @@ export default function LiabilitiesPage() {
                  </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {installments.map(p => {
+                      const savedInstallment = data.liabilities.installments.find(i => i.id === p.id);
+                      const paymentPlanDataUri = savedInstallment?.paymentPlanDataUri;
                       const progress = (p.paid / p.total) * 100;
                       const remaining = p.total - p.paid;
                       const dateParts = p.nextDueDate.split('-').map(part => parseInt(part, 10));
@@ -244,8 +246,8 @@ export default function LiabilitiesPage() {
                                 <p className="font-bold">{p.project} <span className="font-normal text-muted-foreground">- {p.developer}</span></p>
                               </div>
                               <div className="flex items-center gap-2">
-                                {p.paymentPlanDataUri && (
-                                  <Button variant="outline" size="sm" onClick={() => window.open(p.paymentPlanDataUri, '_blank')}>
+                                {paymentPlanDataUri && (
+                                  <Button variant="outline" size="sm" onClick={() => window.open(paymentPlanDataUri, '_blank')}>
                                     <Eye className="h-4 w-4 mr-1"/> View Plan
                                   </Button>
                                 )}
