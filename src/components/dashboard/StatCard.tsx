@@ -21,9 +21,12 @@ export function StatCard({ title, value, icon, isCurrency = false }: StatCardPro
         return 'text-destructive';
     }
     if (title === 'Avg. Net Cash Flow') {
-        return value >= 0 ? 'text-accent-foreground/90' : 'text-destructive';
+        return value >= 0 ? 'text-green-500' : 'text-destructive';
     }
-    return 'text-accent-foreground/90';
+    if (title === 'Net Worth' || title === 'Asset Value') {
+        return 'text-green-500';
+    }
+    return 'text-foreground';
   };
 
 
