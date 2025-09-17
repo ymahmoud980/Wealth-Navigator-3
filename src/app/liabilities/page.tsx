@@ -149,6 +149,7 @@ export default function LiabilitiesPage() {
       const updatedMainData = updateInstallment(data);
       setData(updatedMainData);
       
+      // Also update editableData if in editing mode
       if (isEditing) {
           const updatedEditableData = updateInstallment(editableData);
           setEditableData(updatedEditableData);
@@ -240,7 +241,8 @@ export default function LiabilitiesPage() {
                  </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {installments.map(p => {
-                      const paymentPlanDataUri = p.paymentPlanDataUri;
+                      const savedInstallment = data.liabilities.installments.find(i => i.id === p.id);
+                      const paymentPlanDataUri = savedInstallment?.paymentPlanDataUri;
                       const progress = (p.paid / p.total) * 100;
                       const remaining = p.total - p.paid;
                       const dateParts = p.nextDueDate.split('-').map(part => parseInt(part, 10));
