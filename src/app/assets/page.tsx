@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useState } from "react";
@@ -23,7 +24,7 @@ import { Progress } from "@/components/ui/progress";
 
 
 export default function AssetsPage() {
-  const { data, setData } = useFinancialData();
+  const { data, setData, loading } = useFinancialData();
   const [isEditing, setIsEditing] = useState(false);
   const [editableData, setEditableData] = useState<FinancialData>(JSON.parse(JSON.stringify(data)));
   const [isAddAssetDialogOpen, setIsAddAssetDialogOpen] = useState(false);
@@ -216,7 +217,7 @@ export default function AssetsPage() {
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {underDevelopment.map(p => {
                     const linkedInstallment = installments.find(i => i.id === p.linkedInstallmentId);
-                    const progress = linkedInstallment ? (linkedInstallment.paid / p.purchasePrice) * 100 : 0;
+                    const progress = linkedInstallment && !loading ? (linkedInstallment.paid / p.purchasePrice) * 100 : 0;
                     
                     return (
                       <div key={p.id} className="p-4 bg-secondary rounded-lg space-y-2 group relative">
