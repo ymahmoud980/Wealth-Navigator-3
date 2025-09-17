@@ -25,7 +25,7 @@ export const initialFinancialData: FinancialData = {
         underDevelopment: [
             { id: 'ud1', name: 'Nile Admin (A4719)', location: 'New Capital', purchasePrice: 2414450, currentValue: 3621675, currency: 'EGP', linkedInstallmentId: 'i1' },
             { id: 'ud2', name: 'Nile Commercial (Co-A1050)', location: 'New Capital', purchasePrice: 8446984, currentValue: 12670476, currency: 'EGP', linkedInstallmentId: 'i2' },
-            { id: 'ud3', name: 'Tycoon H2222', location: 'New Capital', purchasePrice: 9487611, currentValue: 14231416.5, currency: 'EGP', linkedInstallmentId: 'i3' },
+            { id: 'ud3', name: 'Tycoon H2222', location: 'New Capital', purchasePrice: 10578141, currentValue: 14231416.5, currency: 'EGP', linkedInstallmentId: 'i3' },
             { id: 'ud4', name: 'Tycoon H2203', location: 'New Capital', purchasePrice: 10022052, currentValue: 15033078, currency: 'EGP', linkedInstallmentId: 'i4' },
             { id: 'ud5', name: 'Nurai (NUI-11A1-23)', location: 'New Capital', purchasePrice: 4334550, currentValue: 6501825, currency: 'EGP', linkedInstallmentId: 'i5' },
             { id: 'ud6', name: 'Dejoya Primero (S1/S-24)', location: 'New Capital', purchasePrice: 7875000, currentValue: 11812500, currency: 'EGP', linkedInstallmentId: 'i6' },
