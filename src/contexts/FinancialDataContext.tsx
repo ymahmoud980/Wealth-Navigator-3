@@ -14,41 +14,44 @@ interface FinancialDataContextType {
 const FinancialDataContext = createContext<FinancialDataContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = 'financialData';
-const CORRECTION_FLAG_KEY = 'nurai-i5-sept-2025-correction-final';
+const CORRECTION_FLAG_KEY_TYCOON = 'tycoon-h2222-correction-applied';
 
-// This function performs a one-time correction on the user's saved data.
-const applyOneTimeCorrection = (data: FinancialData): FinancialData => {
+// This function performs a one-time correction on the user's saved data for a specific installment.
+const applyOneTimeTycoonCorrection = (data: FinancialData): FinancialData => {
   try {
-    const correctionApplied = localStorage.getItem(CORRECTION_FLAG_KEY);
+    const correctionApplied = localStorage.getItem(CORRECTION_FLAG_KEY_TYCOON);
     if (correctionApplied) {
-      return data;
+      return data; // Correction already applied, do nothing.
     }
 
-    const correctedData = JSON.parse(JSON.stringify(data)); // Deep copy
+    const correctedData = JSON.parse(JSON.stringify(data)); // Deep copy to avoid mutation
     const installments = correctedData.liabilities.installments as Installment[];
-    const nuraiIndex = installments.findIndex(i => i.id === 'i5');
+    const tycoonInstallmentIndex = installments.findIndex(i => i.id === 'i3');
 
-    if (nuraiIndex !== -1) {
-        const currentInstallment = installments[nuraiIndex];
-        
-        // This state represents that the installment due on Sept 25, 2025 is the next one to be paid.
-        const correctPaidAmount = 546047;
-        const correctNextDueDate = "2025-09-25";
+    if (tycoonInstallmentIndex !== -1) {
+      const currentInstallment = installments[tycoonInstallmentIndex];
+      const correctTotal = 10578141;
+      const correctPaid = 4830267;
 
-        currentInstallment.paid = correctPaidAmount;
-        currentInstallment.nextDueDate = correctNextDueDate;
-        console.log(`Applied one-time correction for Nurai (i5) to set paid amount to ${correctPaidAmount} and next due date to ${correctNextDueDate}.`);
+      // Only apply correction if the values are the old, incorrect ones.
+      if (currentInstallment.total !== correctTotal || currentInstallment.paid !== correctPaid) {
+        currentInstallment.total = correctTotal;
+        currentInstallment.paid = correctPaid;
+        console.log(`Applied one-time correction for Tycoon H2222 (i3) to set total to ${correctTotal} and paid to ${correctPaid}.`);
+      }
     }
     
-    localStorage.setItem(CORRECTION_FLAG_KEY, 'true');
+    // Mark that the correction has been run for this user's browser.
+    localStorage.setItem(CORRECTION_FLAG_KEY_TYCOON, 'true');
     return correctedData;
     
   } catch (error) {
     console.error("Error applying one-time data correction:", error);
-    // Return original data if correction fails
+    // Return original data if correction fails to prevent data loss.
     return data;
   }
 };
+
 
 export function FinancialDataProvider({ children }: { children: ReactNode }) {
   const [data, setDataState] = useState<FinancialData>(initialFinancialData);
@@ -62,18 +65,14 @@ export function FinancialDataProvider({ children }: { children: ReactNode }) {
       if (savedDataString) {
         let savedData = JSON.parse(savedDataString);
         // Apply the targeted correction here
-        savedData = applyOneTimeCorrection(savedData);
+        savedData = applyOneTimeTycoonCorrection(savedData);
         
-        // **Resetting the history as requested**
-        savedData.history = [];
-
         setDataState(savedData);
         // Save the corrected data back to local storage immediately
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(savedData));
       } else {
-        const initialDataWithEmptyHistory = { ...initialFinancialData, history: [] };
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialDataWithEmptyHistory));
-        setDataState(initialDataWithEmptyHistory);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialFinancialData));
+        setDataState(initialFinancialData);
       }
     } catch (error) {
       console.error("Error reading from localStorage:", error);
