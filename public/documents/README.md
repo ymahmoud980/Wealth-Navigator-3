@@ -1,11 +1,3 @@
-# Document Storage
+This folder is intentionally left empty. It was used for a manual document management approach that has now been replaced by a dynamic, UI-driven system using Firebase Storage.
 
-This folder is used to store your financial documents for the Wealth Navigator application.
-
-To link a document to an asset or liability:
-1. Go to the "Documents" page in the application.
-2. Find the ID for the item you want to add a document for (e.g., `ud1`).
-3. Name your file with that exact ID (e.g., `ud1.pdf`).
-4. Place the file in this directory.
-
-The "View Document" button in the app will now open this file.
+You no longer need to place files in this folder. Please use the UI in the "Documents" tab of the application to upload and manage your files.

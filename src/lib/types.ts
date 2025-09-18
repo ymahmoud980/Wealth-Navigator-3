@@ -5,6 +5,11 @@ export type ExchangeRates = {
   [key in Currency | 'GOLD_GRAM']: number;
 };
 
+export interface Document {
+  name: string;
+  url: string;
+}
+
 export interface RealEstateAsset {
   id: string;
   name: string;
@@ -16,7 +21,7 @@ export interface RealEstateAsset {
   rentDueDay: number;
   rentFrequency: 'monthly' | 'semi-annual';
   nextRentDueDate: string;
-  documents?: string[];
+  documents?: Document[];
 }
 
 export interface UnderDevelopmentAsset {
@@ -27,7 +32,7 @@ export interface UnderDevelopmentAsset {
   currentValue: number;
   currency: Currency;
   linkedInstallmentId: string;
-  documents?: string[];
+  documents?: Document[];
 }
 
 export interface CashAsset {
@@ -35,14 +40,14 @@ export interface CashAsset {
   location: string;
   amount: number;
   currency: Currency;
-  documents?: string[];
+  documents?: Document[];
 }
 
 export interface GoldAsset {
   id: string;
   description: string;
   grams: number;
-  documents?: string[];
+  documents?: Document[];
 }
 
 export interface OtherAsset {
@@ -50,7 +55,7 @@ export interface OtherAsset {
   description: string;
   value: number;
   currency: Currency;
-  documents?: string[];
+  documents?: Document[];
 }
 
 export interface Salary {
@@ -76,7 +81,7 @@ export interface Loan {
   currency: Currency;
   monthlyPayment: number;
   finalPayment: string;
-  documents?: string[];
+  documents?: Document[];
 }
 
 export interface Installment {
@@ -89,7 +94,7 @@ export interface Installment {
   nextDueDate: string;
   amount: number;
   frequency: 'Annual' | 'Semi-Annual' | 'Quarterly';
-  documents?: string[];
+  documents?: Document[];
 }
 
 export interface Liabilities {
