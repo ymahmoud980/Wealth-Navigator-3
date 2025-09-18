@@ -217,7 +217,7 @@ export default function AssetsPage() {
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {underDevelopment.map(p => {
                     const linkedInstallment = installments.find(i => i.id === p.linkedInstallmentId);
-                    const progress = linkedInstallment && !loading ? (linkedInstallment.paid / p.purchasePrice) * 100 : 0;
+                    const progress = linkedInstallment && !loading ? (linkedInstallment.paid / linkedInstallment.total) * 100 : 0;
                     
                     return (
                       <div key={p.id} className="p-4 bg-secondary rounded-lg space-y-2 group relative">
@@ -231,21 +231,22 @@ export default function AssetsPage() {
                                     <p className="font-bold">{p.name}</p>
                                     <p className="text-sm text-muted-foreground">{p.location}</p>
                                 </div>
-                                <span className="text-sm font-semibold text-green-700">{progress.toFixed(1)}%</span>
+                                <span className="text-sm font-semibold text-green-700">{loading ? '0.0' : progress.toFixed(1)}%</span>
                           </div>
                           <Progress value={progress} className="my-2 h-2" />
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
-                                <label className="text-xs font-medium">Purchase Price ({p.currency})</label>
+                                <label className="text-xs font-medium">Total Price ({p.currency}) (incl. Maint.)</label>
                                 {isEditing ? (
                                 <Input 
                                     type="number" 
-                                    defaultValue={p.purchasePrice}
+                                    defaultValue={linkedInstallment?.total}
                                     onBlur={(e) => handleUnderDevelopmentChange(p.id, 'purchasePrice', e.target.value)}
                                     className="h-8"
+                                    disabled // This should be driven by the installment data
                                 />
                                 ) : (
-                                <p className="font-medium">{formatNumber(p.purchasePrice)}</p>
+                                <p className="font-medium">{formatNumber(linkedInstallment?.total ?? p.purchasePrice)}</p>
                                 )}
                             </div>
                             <div className="space-y-1">
