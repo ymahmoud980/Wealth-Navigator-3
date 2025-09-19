@@ -16,26 +16,8 @@ export function convert(amount: number, fromCurrency: Currency | 'GOLD_GRAM', to
     if (typeof amount !== 'number' || isNaN(amount)) return 0;
     if (fromCurrency === toCurrency) return amount;
     
-    const rateMatrix = buildRateMatrix(exchangeRates);
-    const rate = rateMatrix[fromCurrency]?.[toCurrency];
-    
-    if (rate === undefined) {
-        console.error(`Conversion rate from ${fromCurrency} to ${toCurrency} not found.`);
-        return 0;
-    }
-    return amount * rate;
-}
-
-function buildRateMatrix(baseRates: ExchangeRates) {
-    const currencies = Object.keys(baseRates) as (Currency | 'GOLD_GRAM')[];
-    const matrix: { [from: string]: { [to: string]: number } } = {};
-    for (const from of currencies) {
-        matrix[from] = {};
-        for (const to of currencies) {
-            matrix[from][to] = baseRates[to] / baseRates[from];
-        }
-    }
-    return matrix;
+    const amountInUsd = amount / exchangeRates[fromCurrency];
+    return amountInUsd * exchangeRates[toCurrency];
 }
 
 export function calculateMetrics(data: FinancialData, displayCurrency: Currency) {
