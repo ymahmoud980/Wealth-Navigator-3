@@ -6,7 +6,7 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  projectId: "wealthwise-03-09692965-e2a36",
+  projectId: "wealthwise-demo-project",
   appId: "1:598104639129:web:d7a13196e6e0136feb5a08",
   storageBucket: "wealthwise-03-09692965-e2a36.appspot.com",
   apiKey: "AIzaSyAW1NOjMUD3cWYDDzTImM0d4T9JxEEPLsE",
