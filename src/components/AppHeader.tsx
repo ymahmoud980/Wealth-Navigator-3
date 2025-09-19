@@ -28,6 +28,7 @@ const pageTitles: { [key: string]: string } = {
   "/breakdown": "Calculation Breakdown",
   "/health": "Financial Health Analysis",
   "/trends": "Financial Trends",
+  "/report": "Financial Report",
 };
 
 export function AppHeader() {

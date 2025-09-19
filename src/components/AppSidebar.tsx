@@ -23,6 +23,7 @@ import {
   FileText,
   HeartPulse,
   AreaChart,
+  BookOpen,
 } from "lucide-react";
 
 const navItems = [
@@ -33,6 +34,7 @@ const navItems = [
   { href: "/breakdown", label: "Calculation Breakdown", icon: <FileText /> },
   { href: "/trends", label: "Trends", icon: <AreaChart /> },
   { href: "/health", label: "Financial Health", icon: <HeartPulse /> },
+  { href: "/report", label: "Financial Report", icon: <BookOpen /> },
   { href: "/advisor", label: "AI Advisor", icon: <BrainCircuit /> },
   { href: "/calculator", label: "Currency Calculator", icon: <Calculator /> },
 ];
