@@ -5,13 +5,6 @@ export type ExchangeRates = {
   [key in Currency | 'GOLD_GRAM']: number;
 };
 
-// Document type is no longer a simple string.
-// It will be an object when we fetch it from Storage.
-export interface Document {
-  name: string;
-  url: string;
-}
-
 export interface RealEstateAsset {
   id: string;
   name: string;

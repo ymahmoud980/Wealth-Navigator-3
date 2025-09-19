@@ -21,10 +21,8 @@ import {
   Calculator,
   Settings,
   FileText,
-  Sparkles,
   HeartPulse,
   AreaChart,
-  FolderKanban
 } from "lucide-react";
 
 const navItems = [
@@ -35,9 +33,7 @@ const navItems = [
   { href: "/breakdown", label: "Calculation Breakdown", icon: <FileText /> },
   { href: "/trends", label: "Trends", icon: <AreaChart /> },
   { href: "/health", label: "Financial Health", icon: <HeartPulse /> },
-  { href: "/documents", label: "Documents", icon: <FolderKanban /> },
   { href: "/advisor", label: "AI Advisor", icon: <BrainCircuit /> },
-  { href: "/insights", label: "AI Insights", icon: <Sparkles /> },
   { href: "/calculator", label: "Currency Calculator", icon: <Calculator /> },
 ];
 

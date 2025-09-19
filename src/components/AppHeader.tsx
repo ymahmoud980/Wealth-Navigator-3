@@ -25,12 +25,10 @@ const pageTitles: { [key: string]: string } = {
   "/liabilities": "Liability Tracking",
   "/cashflow": "Cash Flow Management",
   "/advisor": "AI Financial Advisor",
-  "/insights": "AI Document Insights",
   "/calculator": "Currency Calculator",
   "/breakdown": "Calculation Breakdown",
   "/health": "Financial Health Analysis",
   "/trends": "Financial Trends",
-  "/documents": "Document Library",
 };
 
 export function AppHeader() {
