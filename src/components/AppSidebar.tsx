@@ -90,7 +90,7 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
-         {userProfile && (
+         {userProfile && userProfile.name && (
             <div className="p-2 group-data-[collapsible=icon]:hidden">
                 <div className="p-2 rounded-lg bg-sidebar-accent text-sidebar-accent-foreground">
                     <div className="flex items-center gap-3">
