@@ -23,6 +23,7 @@ import {
   AreaChart,
   BookOpen,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: <LayoutDashboard /> },
@@ -39,6 +40,11 @@ const navItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { user, loading } = useAuth();
+  
+  if (!user || loading || pathname === '/signin' || pathname === '/signup') {
+    return null;
+  }
 
   return (
     <Sidebar variant="inset" collapsible="icon">

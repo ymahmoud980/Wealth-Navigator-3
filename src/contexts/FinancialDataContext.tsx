@@ -6,6 +6,9 @@ import type { FinancialData } from '@/lib/types';
 import { initialFinancialData } from '@/lib/data';
 import { calculateMetrics } from '@/lib/calculations';
 import { useCurrency } from '@/hooks/use-currency';
+import { useAuth } from './AuthContext';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface FinancialDataContextType {
   data: FinancialData;
@@ -16,39 +19,55 @@ interface FinancialDataContextType {
 
 const FinancialDataContext = createContext<FinancialDataContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'financialData';
-
 export function FinancialDataProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [data, setDataState] = useState<FinancialData>(initialFinancialData);
   const [loading, setLoading] = useState(true);
   const { currency } = useCurrency();
 
-  useEffect(() => {
-    const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (savedData) {
-      setDataState(JSON.parse(savedData));
+  const fetchData = useCallback(async () => {
+    if (!user) {
+        setLoading(false);
+        return;
+    }
+    setLoading(true);
+    const userDocRef = doc(db, 'userFinancialData', user.uid);
+    const docSnap = await getDoc(userDocRef);
+
+    if (docSnap.exists()) {
+      setDataState(docSnap.data() as FinancialData);
+    } else {
+      // If no data, set initial data for the new user
+      await setDoc(userDocRef, initialFinancialData);
+      setDataState(initialFinancialData);
     }
     setLoading(false);
-  }, []);
+  }, [user]);
 
-  const setData = useCallback((newData: FinancialData) => {
-    try {
-      const updatedData = { ...newData, lastUpdated: new Date().toISOString() };
-      setDataState(updatedData);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedData));
-    } catch (error) {
-      console.error("Failed to save data to localStorage:", error);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const setData = useCallback(async (newData: FinancialData) => {
+    setDataState(newData);
+    if (user) {
+      try {
+        const userDocRef = doc(db, 'userFinancialData', user.uid);
+        await setDoc(userDocRef, newData, { merge: true });
+      } catch (error) {
+        console.error("Failed to save data to Firestore:", error);
+      }
     }
-  }, []);
+  }, [user]);
 
   const metrics = useMemo(() => calculateMetrics(data, currency), [data, currency]);
 
   const value = useMemo(() => ({
     data,
     setData,
-    loading,
+    loading: loading || !user,
     metrics,
-  }), [data, loading, setData, metrics]);
+  }), [data, setData, loading, user, metrics]);
 
   return (
     <FinancialDataContext.Provider value={value}>

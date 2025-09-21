@@ -120,3 +120,11 @@ export interface DocumentedItem {
   id: string;
   name: string;
 };
+
+export interface UserData {
+  uid: string;
+  name: string;
+  email: string;
+  role: 'user' | 'admin';
+  createdAt: string;
+}

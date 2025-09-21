@@ -11,12 +11,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCurrency } from "@/hooks/use-currency";
-import type { Currency, FinancialData, HistoryEntry } from "@/lib/types";
+import type { Currency, FinancialData, HistoryEntry, UserData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Upload, Download, Save } from "lucide-react";
+import { Upload, Download, Save, LogOut } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useToast } from "@/hooks/use-toast";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const pageTitles: { [key: string]: string } = {
   "/": "Dashboard",
@@ -33,13 +43,14 @@ const pageTitles: { [key: string]: string } = {
 
 export function AppHeader() {
   const pathname = usePathname();
-  const { currency } = useCurrency();
-  const { setCurrency } = useCurrency();
-  const { data, setData, metrics } = useFinancialData();
+  const { currency, setCurrency } = useCurrency();
+  const { data, setData, metrics, loading } = useFinancialData();
+  const { user, userData, signOut } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const title = pageTitles[pathname] || "Wealth Navigator";
+  const showHeaderContent = user && !loading && pathname !== '/signin' && pathname !== '/signup';
 
   const handleExport = () => {
     const jsonData = JSON.stringify(data, null, 2);
@@ -120,46 +131,74 @@ export function AppHeader() {
     });
   };
 
-
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
       <div className="md:hidden">
-        <SidebarTrigger />
+        {showHeaderContent && <SidebarTrigger />}
       </div>
       <h1 className="text-xl font-semibold md:text-2xl">{title}</h1>
 
-      <div className="ml-auto flex items-center gap-2">
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          onChange={handleFileImport}
-          accept="application/json"
-        />
-        <Button variant="outline" size="sm" onClick={handleSaveSnapshot}>
-          <Save className="mr-2 h-4 w-4" />
-          Save Snapshot
-        </Button>
-        <Button variant="outline" size="sm" onClick={handleImportClick}>
-          <Upload className="mr-2 h-4 w-4" />
-          Import
-        </Button>
-         <Button variant="outline" size="sm" onClick={handleExport}>
-          <Download className="mr-2 h-4 w-4" />
-          Export
-        </Button>
-        <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
-          <SelectTrigger className="w-[100px]">
-            <SelectValue placeholder="Currency" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="USD">USD</SelectItem>
-            <SelectItem value="EGP">EGP</SelectItem>
-            <SelectItem value="KWD">KWD</SelectItem>
-            <SelectItem value="TRY">TRY</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {showHeaderContent && (
+        <div className="ml-auto flex items-center gap-2">
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileImport}
+            accept="application/json"
+          />
+          <div className="hidden sm:flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleSaveSnapshot}>
+              <Save className="mr-2 h-4 w-4" />
+              Save Snapshot
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleImportClick}>
+              <Upload className="mr-2 h-4 w-4" />
+              Import
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+          </div>
+          <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
+            <SelectTrigger className="w-[100px]">
+              <SelectValue placeholder="Currency" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="USD">USD</SelectItem>
+              <SelectItem value="EGP">EGP</SelectItem>
+              <SelectItem value="KWD">KWD</SelectItem>
+              <SelectItem value="TRY">TRY</SelectItem>
+            </SelectContent>
+          </Select>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Avatar className="h-9 w-9">
+                  <AvatarImage src={`https://avatar.iran.liara.run/public/boy?username=${user.uid}`} alt={userData?.name} />
+                  <AvatarFallback>{userData?.name?.charAt(0)}</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">{userData?.name}</p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user.email}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={signOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
     </header>
   );
 }
