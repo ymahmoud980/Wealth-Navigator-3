@@ -1,8 +1,7 @@
-
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps, type FirebaseOptions } from "firebase/app";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
-import { getAuth, signInAnonymously, onAuthStateChanged, type User } from "firebase/auth";
+import { getAuth, onAuthStateChanged, type User, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import type { FinancialData } from './types';
 
 const firebaseConfig: FirebaseOptions = {
@@ -18,6 +17,7 @@ const firebaseConfig: FirebaseOptions = {
 const app = getApps().length === 0 && firebaseConfig.apiKey ? initializeApp(firebaseConfig) : getApps()[0];
 const db = getFirestore(app);
 const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
 
 const DATA_COLLECTION_ID = 'userData';
 
@@ -48,5 +48,9 @@ export const saveFinancialDataToFirestore = async (userId: string, data: Financi
     }
 };
 
-export { auth, signInAnonymously, onAuthStateChanged };
+export const signInWithGoogle = () => {
+  return signInWithPopup(auth, googleProvider);
+};
+
+export { auth, onAuthStateChanged };
 export type { User };

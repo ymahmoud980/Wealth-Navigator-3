@@ -2,13 +2,13 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { auth, onAuthStateChanged, signInAnonymously as firebaseSignInAnonymously, type User } from '@/lib/firebase';
+import { auth, onAuthStateChanged, signInWithGoogle, type User } from '@/lib/firebase';
 import { Loader2 } from 'lucide-react';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signInAnonymously: () => Promise<void>;
+  signInWithGoogle: () => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,11 +26,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const signInAnonymously = async () => {
+  const handleSignInWithGoogle = async () => {
     try {
-      await firebaseSignInAnonymously(auth);
+      return await signInWithGoogle();
     } catch (error) {
-      console.error("Error signing in anonymously:", error);
+      console.error("Error signing in with Google:", error);
       throw error;
     }
   };
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInAnonymously }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle: handleSignInWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );
