@@ -10,11 +10,11 @@ import { Button } from "@/components/ui/button"
 import type { Currency, ExchangeRates } from "@/lib/types"
 
 const rates: ExchangeRates = {
-  USD: 1,
-  EGP: 47.5,
-  KWD: 0.31,
-  TRY: 32.85,
-  GOLD_GRAM: 75.50
+    USD: 1,
+    EGP: 47.35,
+    KWD: 0.307,
+    TRY: 32.8,
+    GOLD_GRAM: 75.50
 };
 
 export default function CalculatorPage() {
@@ -25,8 +25,12 @@ export default function CalculatorPage() {
   const convertedAmount = useMemo(() => {
     const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount
     if (isNaN(numericAmount)) return 0;
-    const amountInUsd = numericAmount / rates[fromCurrency]
-    return amountInUsd * rates[toCurrency]
+    
+    // First, convert the amount to a base currency (USD)
+    const amountInUsd = numericAmount / rates[fromCurrency];
+
+    // Then, convert from USD to the target currency
+    return amountInUsd * rates[toCurrency];
   }, [amount, fromCurrency, toCurrency])
 
   const handleSwap = () => {
