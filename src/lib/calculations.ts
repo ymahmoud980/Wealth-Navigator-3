@@ -8,7 +8,7 @@ export const rates: ExchangeRates = {
     USD: 1,
     EGP: 47.35,      // 1 USD = 47.35 EGP
     KWD: 0.307,      // 1 USD = 0.307 KWD
-    TRY: 53.68,       // 1 USD = 53.68 TRY
+    TRY: 41.84,       // 1 USD = 41.84 TRY
     GOLD_GRAM: 75.50 // Price per gram in USD
 };
 
