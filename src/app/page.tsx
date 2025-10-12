@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -8,15 +9,34 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { DollarSign, TrendingUp, TrendingDown, ArrowRightLeft } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button";
+import { DollarSign, TrendingUp, TrendingDown, ArrowRightLeft, Trash2 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { AssetAllocationChart } from "@/components/dashboard/AssetAllocationChart";
 import { UpcomingPayments } from "@/components/dashboard/UpcomingPayments";
 import { UpcomingRents } from "@/components/dashboard/UpcomingRents";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
+import { emptyFinancialData } from "@/lib/data";
+
 
 export default function DashboardPage() {
-  const { data, metrics } = useFinancialData();
+  const { data, setData, metrics } = useFinancialData();
+  const [isClearAlertOpen, setIsClearAlertOpen] = useState(false);
+
+  const handleClearData = () => {
+    setData(emptyFinancialData);
+    setIsClearAlertOpen(false);
+  }
 
   return (
     <div 
@@ -44,6 +64,39 @@ export default function DashboardPage() {
             <AssetAllocationChart assetsBreakdown={metrics.assets} totalAssets={metrics.totalAssets} />
           </CardContent>
         </Card>
+      
+      <Card className="border-destructive/50">
+        <CardHeader>
+          <CardTitle>Start Fresh</CardTitle>
+          <CardDescription>
+            Clear all the default sample data to start entering your own financial information from a clean slate. This action cannot be undone.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="destructive" onClick={() => setIsClearAlertOpen(true)}>
+            <Trash2 className="mr-2 h-4 w-4" />
+            Clear All Data
+          </Button>
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={isClearAlertOpen} onOpenChange={setIsClearAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all current financial data, including assets, liabilities, and history. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleClearData} className="bg-destructive hover:bg-destructive/90">
+              Yes, Clear Everything
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
 }

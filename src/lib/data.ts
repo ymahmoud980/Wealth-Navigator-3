@@ -67,3 +67,24 @@ export const initialFinancialData: FinancialData = {
     history: [],
     lastUpdated: "2024-08-02T12:00:00.000Z"
 };
+
+
+export const emptyFinancialData: FinancialData = {
+    assets: {
+        realEstate: [],
+        underDevelopment: [],
+        cash: [],
+        gold: [],
+        otherAssets: [],
+        salary: { id: 's1', amount: 0, currency: "USD" }
+    },
+    liabilities: {
+        loans: [],
+        installments: []
+    },
+    monthlyExpenses: {
+        household: []
+    },
+    history: [],
+    lastUpdated: new Date().toISOString()
+};
