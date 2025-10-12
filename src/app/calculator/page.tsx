@@ -19,8 +19,8 @@ const rates: ExchangeRates = {
 
 export default function CalculatorPage() {
   const [amount, setAmount] = useState<number | string>(1000)
-  const [fromCurrency, setFromCurrency] = useState<Currency>("USD")
-  const [toCurrency, setToCurrency] = useState<Currency>("EGP")
+  const [fromCurrency, setFromCurrency] = useState<Currency | 'GOLD_GRAM'>("EGP")
+  const [toCurrency, setToCurrency] = useState<Currency | 'GOLD_GRAM'>("TRY")
 
   const convertedAmount = useMemo(() => {
     const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount
@@ -37,6 +37,13 @@ export default function CalculatorPage() {
     setFromCurrency(toCurrency);
     setToCurrency(fromCurrency);
   }
+
+  const currencyOptions = [
+    { value: "USD", label: "USD - US Dollar" },
+    { value: "EGP", label: "EGP - Egyptian Pound" },
+    { value: "KWD", label: "KWD - Kuwaiti Dinar" },
+    { value: "TRY", label: "TRY - Turkish Lira" },
+  ];
 
   return (
     <Card className="max-w-2xl mx-auto">
@@ -65,10 +72,7 @@ export default function CalculatorPage() {
                         <SelectValue placeholder="From currency" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="USD">USD - US Dollar</SelectItem>
-                        <SelectItem value="EGP">EGP - Egyptian Pound</SelectItem>
-                        <SelectItem value="KWD">KWD - Kuwaiti Dinar</SelectItem>
-                        <SelectItem value="TRY">TRY - Turkish Lira</SelectItem>
+                        {currencyOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                     </SelectContent>
                 </Select>
             </div>
@@ -87,10 +91,7 @@ export default function CalculatorPage() {
                     <SelectValue placeholder="To currency" />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="USD">USD - US Dollar</SelectItem>
-                    <SelectItem value="EGP">EGP - Egyptian Pound</SelectItem>
-                    <SelectItem value="KWD">KWD - Kuwaiti Dinar</SelectItem>
-                    <SelectItem value="TRY">TRY - Turkish Lira</SelectItem>
+                    {currencyOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                 </SelectContent>
             </Select>
         </div>
