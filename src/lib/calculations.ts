@@ -6,10 +6,10 @@ import type { FinancialData, ExchangeRates, Currency } from './types';
 
 export const rates: ExchangeRates = {
     USD: 1,
-    EGP: 47.35,      // 1 USD = 47.35 EGP
-    KWD: 0.307,      // 1 USD = 0.307 KWD
-    TRY: 41.84,       // 1 USD = 41.84 TRY
-    GOLD_GRAM: 75.50 // Price per gram in USD
+    EGP: 47.35,
+    KWD: 0.307,
+    TRY: 41.84,
+    GOLD_GRAM: 75.50 // 1 gram of gold = 75.50 USD
 };
 
 export function convert(amount: number, fromCurrency: Currency | 'GOLD_GRAM', toCurrency: Currency, exchangeRates: ExchangeRates): number {
@@ -22,7 +22,9 @@ export function convert(amount: number, fromCurrency: Currency | 'GOLD_GRAM', to
     if (!rateFrom || !rateTo) return 0;
 
     // First, convert the amount to a base currency (USD)
-    const amountInUsd = amount / rateFrom;
+    const amountInUsd = fromCurrency === 'GOLD_GRAM' 
+      ? amount * rateFrom // For gold, it's a direct multiplication (grams * price_per_gram)
+      : amount / rateFrom; // For currencies, we divide to get to the base
     
     // Then, convert from USD to the target currency
     return amountInUsd * rateTo;
