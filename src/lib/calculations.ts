@@ -6,9 +6,9 @@ import type { FinancialData, ExchangeRates, Currency } from './types';
 
 export const rates: ExchangeRates = {
     USD: 1,
-    EGP: 47.35,
-    KWD: 0.307,
-    TRY: 41.84,
+    EGP: 47.35, // 1 USD = 47.35 EGP
+    KWD: 0.307, // 1 USD = 0.307 KWD
+    TRY: 41.84, // 1 USD = 41.84 TRY
     GOLD_GRAM: 75.50 // 1 gram of gold = 75.50 USD
 };
 
