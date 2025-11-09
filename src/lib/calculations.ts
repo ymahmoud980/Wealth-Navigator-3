@@ -34,11 +34,11 @@ export function calculateMetrics(data: FinancialData, displayCurrency: Currency)
     const convertToDisplay = (amount: number, from: Currency | 'GOLD_GRAM') => convert(amount, from, displayCurrency, rates);
 
     // --- ASSET CALCULATIONS ---
-    const offPlanAssetsValue = data.assets.underDevelopment.reduce((sum, p) => sum + convertToDisplay(p.currentValue, p.currency), 0);
-    const existingRealEstateValue = data.assets.realEstate.reduce((sum, p) => sum + convertToDisplay(p.currentValue, p.currency), 0);
-    const cashValue = data.assets.cash.reduce((sum, c) => sum + convertToDisplay(c.amount, c.currency), 0);
-    const goldValue = data.assets.gold.reduce((sum, g) => sum + convertToDisplay(g.grams, "GOLD_GRAM"), 0);
-    const otherAssetsValue = data.assets.otherAssets.reduce((sum, o) => sum + convertToDisplay(o.value, o.currency), 0);
+    const offPlanAssetsValue = (data.assets.underDevelopment || []).reduce((sum, p) => sum + convertToDisplay(p.currentValue, p.currency), 0);
+    const existingRealEstateValue = (data.assets.realEstate || []).reduce((sum, p) => sum + convertToDisplay(p.currentValue, p.currency), 0);
+    const cashValue = (data.assets.cash || []).reduce((sum, c) => sum + convertToDisplay(c.amount, c.currency), 0);
+    const goldValue = (data.assets.gold || []).reduce((sum, g) => sum + convertToDisplay(g.grams, "GOLD_GRAM"), 0);
+    const otherAssetsValue = (data.assets.otherAssets || []).reduce((sum, o) => sum + convertToDisplay(o.value, o.currency), 0);
 
     const totalAssets = existingRealEstateValue + offPlanAssetsValue + cashValue + goldValue + otherAssetsValue;
     
@@ -51,8 +51,8 @@ export function calculateMetrics(data: FinancialData, displayCurrency: Currency)
     };
 
     // --- LIABILITY CALCULATIONS ---
-    const loansValue = data.liabilities.loans.reduce((sum, l) => sum + convertToDisplay(l.remaining, l.currency), 0);
-    const installmentsValue = data.liabilities.installments.reduce((sum, i) => sum + convertToDisplay(i.total - i.paid, i.currency), 0);
+    const loansValue = (data.liabilities.loans || []).reduce((sum, l) => sum + convertToDisplay(l.remaining, l.currency), 0);
+    const installmentsValue = (data.liabilities.installments || []).reduce((sum, i) => sum + convertToDisplay(i.total - i.paid, i.currency), 0);
     const totalLiabilities = loansValue + installmentsValue;
     
     const liabilitiesBreakdown = {
@@ -61,8 +61,8 @@ export function calculateMetrics(data: FinancialData, displayCurrency: Currency)
     };
 
     // --- CASH FLOW CALCULATIONS ---
-    const salaryIncome = convertToDisplay(data.assets.salary.amount, data.assets.salary.currency);
-    const rentIncome = data.assets.realEstate.reduce((sum, p) => {
+    const salaryIncome = data.assets.salary ? convertToDisplay(data.assets.salary.amount, data.assets.salary.currency) : 0;
+    const rentIncome = (data.assets.realEstate || []).reduce((sum, p) => {
         const rentInDisplayCurrency = convertToDisplay(p.monthlyRent, p.rentCurrency || p.currency);
         if (p.rentFrequency === 'semi-annual') {
             return sum + (rentInDisplayCurrency / 6);
@@ -79,7 +79,7 @@ export function calculateMetrics(data: FinancialData, displayCurrency: Currency)
         rent: rentIncome
     };
 
-    const monthlyInstallmentAverage = data.liabilities.installments.reduce((sum, p) => {
+    const monthlyInstallmentAverage = (data.liabilities.installments || []).reduce((sum, p) => {
         let monthlyCost = 0;
         if (p.frequency === 'Annual') monthlyCost = p.amount / 12;
         if (p.frequency === 'Semi-Annual') monthlyCost = p.amount / 6;
@@ -87,8 +87,8 @@ export function calculateMetrics(data: FinancialData, displayCurrency: Currency)
         return sum + convertToDisplay(monthlyCost, p.currency);
     }, 0);
 
-    const loanExpenses = data.liabilities.loans.reduce((sum, l) => sum + convertToDisplay(l.monthlyPayment, l.currency), 0);
-    const householdExpenses = data.monthlyExpenses.household.reduce((sum, h) => sum + convertToDisplay(h.amount, h.currency), 0);
+    const loanExpenses = (data.liabilities.loans || []).reduce((sum, l) => sum + convertToDisplay(l.monthlyPayment, l.currency), 0);
+    const householdExpenses = (data.monthlyExpenses.household || []).reduce((sum, h) => sum + convertToDisplay(h.amount, h.currency), 0);
     const totalExpenses = loanExpenses + householdExpenses + monthlyInstallmentAverage;
 
     const expensesBreakdown = {
