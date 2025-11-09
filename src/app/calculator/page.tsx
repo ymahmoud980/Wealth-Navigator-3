@@ -8,30 +8,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowRightLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Currency, ExchangeRates } from "@/lib/types"
-
-const rates: ExchangeRates = {
-    USD: 1,
-    EGP: 47.35,
-    KWD: 0.307,
-    TRY: 32.8,
-    GOLD_GRAM: 75.50
-};
+import { useCurrency } from "@/hooks/use-currency"
 
 export default function CalculatorPage() {
   const [amount, setAmount] = useState<number | string>(1000)
   const [fromCurrency, setFromCurrency] = useState<Currency | 'GOLD_GRAM'>("EGP")
   const [toCurrency, setToCurrency] = useState<Currency | 'GOLD_GRAM'>("TRY")
+  const { rates } = useCurrency();
 
   const convertedAmount = useMemo(() => {
     const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount
-    if (isNaN(numericAmount)) return 0;
+    if (isNaN(numericAmount) || !rates) return 0;
     
     // First, convert the amount to a base currency (USD)
-    const amountInUsd = numericAmount / rates[fromCurrency];
+    const amountInUsd = numericAmount / rates[fromCurrency as keyof ExchangeRates];
 
     // Then, convert from USD to the target currency
-    return amountInUsd * rates[toCurrency];
-  }, [amount, fromCurrency, toCurrency])
+    return amountInUsd * rates[toCurrency as keyof ExchangeRates];
+  }, [amount, fromCurrency, toCurrency, rates])
 
   const handleSwap = () => {
     setFromCurrency(toCurrency);
@@ -50,7 +44,7 @@ export default function CalculatorPage() {
       <CardHeader>
         <CardTitle>Currency Calculator</CardTitle>
         <CardDescription>
-          Quickly convert amounts between supported currencies.
+          Quickly convert amounts between supported currencies using live exchange rates.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

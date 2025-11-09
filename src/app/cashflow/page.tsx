@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { useCurrency } from "@/hooks/use-currency"
-import { convert, rates } from "@/lib/calculations"
+import { convert } from "@/lib/calculations"
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { AddExpenseDialog } from "@/components/cashflow/AddExpenseDialog";
 import { Trash2 } from "lucide-react";
 
 export default function CashFlowPage() {
-    const { currency, format } = useCurrency();
+    const { currency, format, rates } = useCurrency();
     const { data, setData, metrics } = useFinancialData();
     const [isEditing, setIsEditing] = useState(false);
     const [editableData, setEditableData] = useState<FinancialData>(JSON.parse(JSON.stringify(data)));
@@ -173,7 +173,7 @@ export default function CashFlowPage() {
                                 </div>
                                 <div className="pl-4 mt-2 space-y-1">
                                     <div className="flex justify-between items-center"><span className="text-muted-foreground">Loan Payments</span><span className="text-red-700">{format(expenses.loans)}</span></div>
-                                    {currentData.monthlyExpenses.household.map(h => (
+                                    {(currentData.monthlyExpenses.household || []).map(h => (
                                          <div key={h.id} className="flex justify-between items-center group">
                                             {isEditing ? (
                                                 <>

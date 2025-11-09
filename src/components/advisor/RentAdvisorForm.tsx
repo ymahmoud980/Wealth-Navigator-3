@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -23,6 +24,7 @@ import { Lightbulb, Loader2, TrendingUp } from "lucide-react";
 import { suggestOptimalRentIncreases, type SuggestOptimalRentIncreasesOutput } from "@/ai/flows/suggest-optimal-rent-increases";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/hooks/use-currency";
+import type { ExchangeRates } from "@/lib/types";
 
 const formSchema = z.object({
   propertyLocation: z.string().min(2, "Location is required."),
@@ -55,7 +57,7 @@ export function RentAdvisorForm() {
 
     try {
       // The AI flow expects the value in USD, so we convert it from the currently selected currency.
-      const valueInUsd = values.currentMarketValue / rates[currency];
+      const valueInUsd = values.currentMarketValue / rates[currency as keyof ExchangeRates];
 
       // Dummy conversion of string to structured data
       const historicalRentalIncome = values.historicalRentalIncome.split('\n').map(line => {

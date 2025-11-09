@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator"
 import { TrendingUp, TrendingDown, Wallet, DollarSign } from "lucide-react"
 import { useCurrency } from "@/hooks/use-currency";
-import { convert, rates } from "@/lib/calculations";
+import { convert } from "@/lib/calculations";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 
 const Row = ({ label, value, isSub = false, isNegative = false, isTotal = false, isGrandTotal = false, format }: { label: string, value: number, isSub?: boolean, isNegative?: boolean, isTotal?: boolean, isGrandTotal?: boolean, format: (value: number) => string }) => (
@@ -16,7 +16,7 @@ const Row = ({ label, value, isSub = false, isNegative = false, isTotal = false,
 );
 
 export default function BreakdownPage() {
-  const { currency, format } = useCurrency();
+  const { currency, format, rates } = useCurrency();
   const { data, metrics } = useFinancialData();
 
   return (
@@ -59,19 +59,22 @@ export default function BreakdownPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             <Row label="Existing Real Estate" value={metrics.assets.existingRealEstate} isTotal format={format} />
-            {data.assets.realEstate.map(asset => <Row key={asset.id} label={asset.name} value={convert(asset.currentValue, asset.currency, currency, rates)} isSub format={format} />)}
+            {(data.assets.realEstate || []).map(asset => <Row key={asset.id} label={asset.name} value={convert(asset.currentValue, asset.currency, currency, rates)} isSub format={format} />)}
 
             <Row label="Off-Plan Real Estate" value={metrics.assets.offPlanRealEstate} isTotal format={format} />
-            {data.assets.underDevelopment.map(asset => <Row key={asset.id} label={asset.name} value={convert(asset.currentValue, asset.currency, currency, rates)} isSub format={format} />)}
+            {(data.assets.underDevelopment || []).map(asset => <Row key={asset.id} label={asset.name} value={convert(asset.currentValue, asset.currency, currency, rates)} isSub format={format} />)}
             
             <Row label="Cash Holdings" value={metrics.assets.cash} isTotal format={format} />
-            {data.assets.cash.map(asset => <Row key={asset.id} label={`Cash - ${asset.location}`} value={convert(asset.amount, asset.currency, currency, rates)} isSub format={format} />)}
+            {(data.assets.cash || []).map(asset => <Row key={asset.id} label={`Cash - ${asset.location}`} value={convert(asset.amount, asset.currency, currency, rates)} isSub format={format} />)}
 
             <Row label="Gold" value={metrics.assets.gold} isTotal format={format} />
-            {data.assets.gold.map(asset => <Row key={asset.id} label={asset.description} value={convert(asset.grams, 'GOLD_GRAM', currency, rates)} isSub format={format} />)}
+            {(data.assets.gold || []).map(asset => <Row key={asset.id} label={asset.location} value={convert(asset.grams, 'GOLD_GRAM', currency, rates)} isSub format={format} />)}
+
+            <Row label="Silver" value={metrics.assets.silver} isTotal format={format} />
+            {(data.assets.silver || []).map(asset => <Row key={asset.id} label={asset.location} value={convert(asset.grams, 'SILVER_GRAM', currency, rates)} isSub format={format} />)}
 
             <Row label="Other Assets" value={metrics.assets.other} isTotal format={format} />
-            {data.assets.otherAssets.map(asset => <Row key={asset.id} label={asset.description} value={convert(asset.value, asset.currency, currency, rates)} isSub format={format} />)}
+            {(data.assets.otherAssets || []).map(asset => <Row key={asset.id} label={asset.description} value={convert(asset.value, asset.currency, currency, rates)} isSub format={format} />)}
             
             <Separator className="my-4"/>
             <Row label="Total Asset Value" value={metrics.totalAssets} isGrandTotal={true} format={format} />
@@ -85,10 +88,10 @@ export default function BreakdownPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             <Row label="Loans" value={metrics.liabilities.loans} isTotal isNegative format={format} />
-            {data.liabilities.loans.map(l => <Row key={l.id} label={`${l.lender} Loan`} value={convert(l.remaining, l.currency, currency, rates)} isSub isNegative format={format} />)}
+            {(data.liabilities.loans || []).map(l => <Row key={l.id} label={`${l.lender} Loan`} value={convert(l.remaining, l.currency, currency, rates)} isSub isNegative format={format} />)}
 
             <Row label="Installments Remaining" value={metrics.liabilities.installments} isTotal isNegative format={format} />
-            {data.liabilities.installments.map(i => <Row key={i.id} label={i.project} value={convert(i.total - i.paid, i.currency, currency, rates)} isSub isNegative format={format} />)}
+            {(data.liabilities.installments || []).map(i => <Row key={i.id} label={i.project} value={convert(i.total - i.paid, i.currency, currency, rates)} isSub isNegative format={format} />)}
 
             <Separator className="my-4" />
             <Row label="Total Liabilities" value={metrics.totalLiabilities} isGrandTotal={true} isNegative format={format} />
@@ -103,7 +106,7 @@ export default function BreakdownPage() {
           <CardContent className="space-y-2">
             <Row label="Salary" value={metrics.income.salary} isTotal format={format} />
             <Row label="Property Rentals" value={metrics.income.rent} isTotal format={format} />
-            {data.assets.realEstate.filter(r => r.monthlyRent > 0).map(r => {
+            {(data.assets.realEstate || []).filter(r => r.monthlyRent > 0).map(r => {
                 let monthlyRent = convert(r.monthlyRent, r.rentCurrency || r.currency, currency, rates);
                 if (r.rentFrequency === 'semi-annual') {
                     monthlyRent = monthlyRent / 6;
@@ -123,13 +126,13 @@ export default function BreakdownPage() {
           </CardHeader>
           <CardContent className="space-y-2">
              <Row label="Loan Payments" value={metrics.expenses.loans} isTotal isNegative format={format} />
-             {data.liabilities.loans.map(l => <Row key={l.id} label={`${l.lender} Loan`} value={convert(l.monthlyPayment, l.currency, currency, rates)} isSub isNegative format={format} />)}
+             {(data.liabilities.loans || []).map(l => <Row key={l.id} label={`${l.lender} Loan`} value={convert(l.monthlyPayment, l.currency, currency, rates)} isSub isNegative format={format} />)}
             
             <Row label="Household Expenses" value={metrics.expenses.household} isTotal isNegative format={format} />
-            {data.monthlyExpenses.household.map(h => <Row key={h.id} label={h.description} value={convert(h.amount, h.currency, currency, rates)} isSub isNegative format={format} />)}
+            {(data.monthlyExpenses.household || []).map(h => <Row key={h.id} label={h.description} value={convert(h.amount, h.currency, currency, rates)} isSub isNegative format={format} />)}
 
             <Row label="Avg. Project Installments" value={metrics.expenses.installmentsAvg} isTotal isNegative format={format} />
-             {data.liabilities.installments.map(p => {
+             {(data.liabilities.installments || []).map(p => {
                 let monthlyCost = 0;
                 if (p.frequency === 'Annual') monthlyCost = p.amount / 12;
                 else if (p.frequency === 'Semi-Annual') monthlyCost = p.amount / 6;

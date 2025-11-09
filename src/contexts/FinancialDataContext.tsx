@@ -23,7 +23,7 @@ export function FinancialDataProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [data, setDataState] = useState<FinancialData>(initialFinancialData);
   const [loading, setLoading] = useState(true);
-  const { currency } = useCurrency();
+  const { currency, rates } = useCurrency();
 
   const fetchData = useCallback(async () => {
     if (!user) {
@@ -60,7 +60,7 @@ export function FinancialDataProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  const metrics = useMemo(() => calculateMetrics(data, currency), [data, currency]);
+  const metrics = useMemo(() => calculateMetrics(data, currency, rates), [data, currency, rates]);
 
   const value = useMemo(() => ({
     data,

@@ -1,15 +1,15 @@
 
-
 import type { FinancialData, ExchangeRates, Currency } from './types';
 
 // This file will hold the core calculation logic based on your Gemini Pro app.
 // We are moving the logic here to keep components clean.
 
+// Default rates are used as a fallback or for non-currency items.
 export const rates: ExchangeRates = {
     USD: 1,
-    EGP: 47.75, // Assuming 1 USD = 47.75 EGP as a base
-    KWD: 0.3072, // From 155.41 EGP / 47.75 EGP per USD = 3.25 KWD per USD -> 1/3.25 = 0.307
-    TRY: 41.88, // From 1.14 EGP per TRY -> 47.75 / 1.14 = 41.88
+    EGP: 47.75, 
+    KWD: 0.3072,
+    TRY: 41.88,
     GOLD_GRAM: 75.50, // 1 gram of gold = 75.50 USD
     SILVER_GRAM: 0.95, // 1 gram of silver = 0.95 USD
 };
@@ -32,8 +32,8 @@ export function convert(amount: number, fromCurrency: Currency | 'GOLD_GRAM' | '
     return amountInUsd * rateTo;
 }
 
-export function calculateMetrics(data: FinancialData, displayCurrency: Currency) {
-    const convertToDisplay = (amount: number, from: Currency | 'GOLD_GRAM' | 'SILVER_GRAM') => convert(amount, from, displayCurrency, rates);
+export function calculateMetrics(data: FinancialData, displayCurrency: Currency, liveRates: ExchangeRates) {
+    const convertToDisplay = (amount: number, from: Currency | 'GOLD_GRAM' | 'SILVER_GRAM') => convert(amount, from, displayCurrency, liveRates);
 
     // --- ASSET CALCULATIONS ---
     const offPlanAssetsValue = (data.assets.underDevelopment || []).reduce((sum, p) => sum + convertToDisplay(p.currentValue, p.currency), 0);
@@ -86,8 +86,8 @@ export function calculateMetrics(data: FinancialData, displayCurrency: Currency)
     const monthlyInstallmentAverage = (data.liabilities.installments || []).reduce((sum, p) => {
         let monthlyCost = 0;
         if (p.frequency === 'Annual') monthlyCost = p.amount / 12;
-        if (p.frequency === 'Semi-Annual') monthlyCost = p.amount / 6;
-        if (p.frequency === 'Quarterly') monthlyCost = p.amount / 3;
+        else if (p.frequency === 'Semi-Annual') monthlyCost = p.amount / 6;
+        else if (p.frequency === 'Quarterly') monthlyCost = p.amount / 3;
         return sum + convertToDisplay(monthlyCost, p.currency);
     }, 0);
 
