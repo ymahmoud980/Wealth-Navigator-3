@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button";
@@ -56,11 +56,12 @@ export default function SignInPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // Update last login timestamp in Firestore
+      // Use setDoc with merge to prevent error if doc doesn't exist
       const userDocRef = doc(db, "users", user.uid);
-      await updateDoc(userDocRef, {
+      await setDoc(userDocRef, {
         lastLogin: new Date().toISOString(),
-      });
+        email: user.email // Ensure email is present
+      }, { merge: true });
 
       toast({
         title: "Signed in successfully",
