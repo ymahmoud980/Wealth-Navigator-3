@@ -11,7 +11,7 @@ export const rates: ExchangeRates = {
     KWD: 0.3072,
     TRY: 41.88,
     GOLD_GRAM: 128.64, // Fallback price
-    SILVER_GRAM: 4.13, // Fallback price (Note: 48.3 USD is likely per ounce, not gram. 4.13 is a closer per-gram estimate from that)
+    SILVER_GRAM: 1.553, // Fallback price. 1 oz = 31.1035 grams. 48.3 / 31.1035 = ~1.553
 };
 
 export function convert(amount: number, fromCurrency: Currency | 'GOLD_GRAM' | 'SILVER_GRAM', toCurrency: Currency, exchangeRates: ExchangeRates): number {
