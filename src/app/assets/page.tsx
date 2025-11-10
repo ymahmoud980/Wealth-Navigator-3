@@ -106,32 +106,30 @@ export default function AssetsPage() {
   };
   
   const handleAddAsset = (newAsset: any, type: string) => {
-    setData((currentData) => {
-      const updatedData = JSON.parse(JSON.stringify(currentData));
-      const newId = `${type.substring(0, 2)}${new Date().getTime()}`;
-      const assetWithId = { ...newAsset, id: newId };
-  
-      if (type === 'realEstate') {
-          if (!updatedData.assets.realEstate) updatedData.assets.realEstate = [];
-          updatedData.assets.realEstate.push(assetWithId as RealEstateAsset);
-      } else if (type === 'underDevelopment') {
-          if (!updatedData.assets.underDevelopment) updatedData.assets.underDevelopment = [];
-          updatedData.assets.underDevelopment.push(assetWithId as UnderDevelopmentAsset);
-      } else if (type === 'cash') {
-          if (!updatedData.assets.cash) updatedData.assets.cash = [];
-          updatedData.assets.cash.push(assetWithId as CashAsset);
-      } else if (type === 'gold') {
-          if (!updatedData.assets.gold) updatedData.assets.gold = [];
-          updatedData.assets.gold.push(assetWithId as GoldAsset);
-      } else if (type === 'silver') {
-          if (!updatedData.assets.silver) updatedData.assets.silver = [];
-          updatedData.assets.silver.push(assetWithId as SilverAsset);
-      } else if (type === 'other') {
-          if (!updatedData.assets.otherAssets) updatedData.assets.otherAssets = [];
-          updatedData.assets.otherAssets.push(assetWithId as OtherAsset);
-      }
-      return updatedData;
-    });
+    const currentData = JSON.parse(JSON.stringify(data));
+    const newId = `${type.substring(0, 2)}${new Date().getTime()}`;
+    const assetWithId = { ...newAsset, id: newId };
+
+    if (type === 'realEstate') {
+        if (!currentData.assets.realEstate) currentData.assets.realEstate = [];
+        currentData.assets.realEstate.push(assetWithId as RealEstateAsset);
+    } else if (type === 'underDevelopment') {
+        if (!currentData.assets.underDevelopment) currentData.assets.underDevelopment = [];
+        currentData.assets.underDevelopment.push(assetWithId as UnderDevelopmentAsset);
+    } else if (type === 'cash') {
+        if (!currentData.assets.cash) currentData.assets.cash = [];
+        currentData.assets.cash.push(assetWithId as CashAsset);
+    } else if (type === 'gold') {
+        if (!currentData.assets.gold) currentData.assets.gold = [];
+        currentData.assets.gold.push(assetWithId as GoldAsset);
+    } else if (type === 'silver') {
+        if (!currentData.assets.silver) currentData.assets.silver = [];
+        currentData.assets.silver.push(assetWithId as SilverAsset);
+    } else if (type === 'other') {
+        if (!currentData.assets.otherAssets) currentData.assets.otherAssets = [];
+        currentData.assets.otherAssets.push(assetWithId as OtherAsset);
+    }
+    setData(currentData);
     setIsAddAssetDialogOpen(false);
   };
 
@@ -139,26 +137,23 @@ export default function AssetsPage() {
     if (!deleteTarget) return;
     const { type, id } = deleteTarget;
 
-    setData((currentData) => {
-      const updatedData = JSON.parse(JSON.stringify(currentData));
+    const currentData = JSON.parse(JSON.stringify(data));
   
-      if (type === 'realEstate') {
-        updatedData.assets.realEstate = (updatedData.assets.realEstate || []).filter((item: RealEstateAsset) => item.id !== id);
-      } else if (type === 'underDevelopment') {
-        updatedData.assets.underDevelopment = (updatedData.assets.underDevelopment || []).filter((item: UnderDevelopmentAsset) => item.id !== id);
-      } else if (type === 'cash') {
-        updatedData.assets.cash = (updatedData.assets.cash || []).filter((item: CashAsset) => item.id !== id);
-      } else if (type === 'gold') {
-        updatedData.assets.gold = (updatedData.assets.gold || []).filter((item: GoldAsset) => item.id !== id);
-      } else if (type === 'silver') {
-        updatedData.assets.silver = (updatedData.assets.silver || []).filter((item: SilverAsset) => item.id !== id);
-      } else if (type === 'other') {
-        updatedData.assets.otherAssets = (updatedData.assets.otherAssets || []).filter((item: OtherAsset) => item.id !== id);
-      }
-      
-      return updatedData;
-    });
-
+    if (type === 'realEstate') {
+      currentData.assets.realEstate = (currentData.assets.realEstate || []).filter((item: RealEstateAsset) => item.id !== id);
+    } else if (type === 'underDevelopment') {
+      currentData.assets.underDevelopment = (currentData.assets.underDevelopment || []).filter((item: UnderDevelopmentAsset) => item.id !== id);
+    } else if (type === 'cash') {
+      currentData.assets.cash = (currentData.assets.cash || []).filter((item: CashAsset) => item.id !== id);
+    } else if (type === 'gold') {
+      currentData.assets.gold = (currentData.assets.gold || []).filter((item: GoldAsset) => item.id !== id);
+    } else if (type === 'silver') {
+      currentData.assets.silver = (currentData.assets.silver || []).filter((item: SilverAsset) => item.id !== id);
+    } else if (type === 'other') {
+      currentData.assets.otherAssets = (currentData.assets.otherAssets || []).filter((item: OtherAsset) => item.id !== id);
+    }
+    
+    setData(currentData);
     setDeleteTarget(null);
   };
 
@@ -413,5 +408,3 @@ export default function AssetsPage() {
     </>
   )
 }
-
-    
