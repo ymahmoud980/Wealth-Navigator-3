@@ -106,8 +106,7 @@ export default function AssetsPage() {
   };
   
   const handleAddAsset = (newAsset: any, type: string) => {
-    const prevData = data;
-    const updatedData = JSON.parse(JSON.stringify(prevData));
+    const updatedData = JSON.parse(JSON.stringify(data)); // Deep copy current data
     const newId = `${type.substring(0, 2)}${new Date().getTime()}`;
     const assetWithId = { ...newAsset, id: newId };
 
@@ -137,24 +136,24 @@ export default function AssetsPage() {
 
   const handleDeleteConfirm = () => {
     if (!deleteTarget) return;
-
-    const updatedData = JSON.parse(JSON.stringify(data));
+  
     const { type, id } = deleteTarget;
+    const updatedData = JSON.parse(JSON.stringify(data)); // Use fresh data
   
     if (type === 'realEstate') {
-        updatedData.assets.realEstate = (updatedData.assets.realEstate || []).filter((item: any) => item.id !== id);
+      updatedData.assets.realEstate = (updatedData.assets.realEstate || []).filter((item: RealEstateAsset) => item.id !== id);
     } else if (type === 'underDevelopment') {
-        updatedData.assets.underDevelopment = (updatedData.assets.underDevelopment || []).filter((item: any) => item.id !== id);
+      updatedData.assets.underDevelopment = (updatedData.assets.underDevelopment || []).filter((item: UnderDevelopmentAsset) => item.id !== id);
     } else if (type === 'cash') {
-        updatedData.assets.cash = (updatedData.assets.cash || []).filter((item: any) => item.id !== id);
+      updatedData.assets.cash = (updatedData.assets.cash || []).filter((item: CashAsset) => item.id !== id);
     } else if (type === 'gold') {
-        updatedData.assets.gold = (updatedData.assets.gold || []).filter((item: any) => item.id !== id);
+      updatedData.assets.gold = (updatedData.assets.gold || []).filter((item: GoldAsset) => item.id !== id);
     } else if (type === 'silver') {
-        updatedData.assets.silver = (updatedData.assets.silver || []).filter((item: any) => item.id !== id);
+      updatedData.assets.silver = (updatedData.assets.silver || []).filter((item: SilverAsset) => item.id !== id);
     } else if (type === 'other') {
-        updatedData.assets.otherAssets = (updatedData.assets.otherAssets || []).filter((item: any) => item.id !== id);
+      updatedData.assets.otherAssets = (updatedData.assets.otherAssets || []).filter((item: OtherAsset) => item.id !== id);
     }
-
+  
     setData(updatedData);
     setDeleteTarget(null);
   };
