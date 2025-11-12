@@ -68,8 +68,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
                 headers: { 'x-access-token': goldApiKey }
             });
             const silverData = await silverResponse.json();
-            if(silverData.price_gram) {
-                finalRates['SILVER_GRAM'] = silverData.price_gram;
+            if(silverData.price) { // Corrected field name
+                finalRates['SILVER_GRAM'] = silverData.price;
             } else {
                 goldApiError = true;
             }
