@@ -183,18 +183,18 @@ export default function AssetsPage() {
               </Button>
             )}
             <p className="font-semibold">{item.location || item.description}</p>
-            <div className="flex items-end justify-between">
+            <div className="flex items-end justify-between gap-2">
               {isEditing ? (
                 <Input 
                     type="number" 
                     defaultValue={item[valueKey]}
                     onChange={(e) => handleItemChange(item.id, valueKey, e.target.value)}
-                    className="h-8 mt-1 w-2/3"
+                    className="h-8 mt-1 w-full"
                 />
               ) : (
                 <p className="text-xl font-bold">{formatNumber(item[valueKey])}</p>
               )}
-              <p className="text-xs text-muted-foreground">{currencyKey ? item[currencyKey] : unit}</p>
+              <p className="text-xs text-muted-foreground shrink-0">{currencyKey ? item[currencyKey] : unit}</p>
             </div>
           </div>
         ))}
