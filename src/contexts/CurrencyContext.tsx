@@ -47,32 +47,23 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         currencyApiError = true;
       }
 
-      // Fetch Gold and Silver prices
+      // Fetch Gold and Silver prices from a public API
       try {
-        const goldApiKey = process.env.NEXT_PUBLIC_GOLD_API_KEY;
-        if(!goldApiKey) {
-            console.warn("Gold API key not found. Using fallback prices.");
-            goldApiError = true;
-        } else {
-            const goldResponse = await fetch(`https://www.goldapi.io/api/XAU/USD`, {
-                headers: { 'x-access-token': goldApiKey }
-            });
-            const goldData = await goldResponse.json();
-            if(goldData.price_gram_24k) {
-                finalRates['GOLD_GRAM'] = goldData.price_gram_24k;
-            } else {
-                 goldApiError = true;
-            }
+        const metalResponse = await fetch(`https://api.metals.live/v1/spot`);
+        const metalData = await metalResponse.json();
+        
+        const goldItem = metalData.find((metal: any) => metal.metal === 'gold');
+        const silverItem = metalData.find((metal: any) => metal.metal === 'silver');
 
-            const silverResponse = await fetch(`https://www.goldapi.io/api/XAG/USD`, {
-                headers: { 'x-access-token': goldApiKey }
-            });
-            const silverData = await silverResponse.json();
-            if(silverData.price) { // Corrected field name
-                finalRates['SILVER_GRAM'] = silverData.price;
-            } else {
-                goldApiError = true;
-            }
+        if (goldItem) {
+          finalRates['GOLD_GRAM'] = goldItem.price / 31.1035; // Convert from Troy Oz to Gram
+        } else {
+          goldApiError = true;
+        }
+        if (silverItem) {
+          finalRates['SILVER_GRAM'] = silverItem.price / 31.1035; // Convert from Troy Oz to Gram
+        } else {
+          goldApiError = true;
         }
       } catch (error) {
           console.error("Error fetching precious metal prices:", error);
