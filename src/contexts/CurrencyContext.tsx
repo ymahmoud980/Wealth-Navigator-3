@@ -1,9 +1,8 @@
 
 "use client";
 
-import { createContext, useState, useMemo, type ReactNode } from 'react';
+import { createContext, useState, useMemo, type ReactNode, useEffect, useCallback } from 'react';
 import type { Currency, ExchangeRates } from '@/lib/types';
-import { rates as defaultRates } from '@/lib/calculations';
 
 // Constants for conversion
 const GRAMS_PER_TROY_OUNCE = 31.1035;
@@ -23,7 +22,7 @@ export const CurrencyContext = createContext<CurrencyContextType | undefined>(un
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrency] = useState<Currency>('USD');
-  const [currencyRates, setCurrencyRates] = useState<ExchangeRates>(defaultRates);
+  const [currencyRates, setCurrencyRates] = useState<ExchangeRates>({ USD: 1, EGP: 47.75, KWD: 0.3072, TRY: 41.88 });
 
   // State for user-defined metal prices
   const [goldPricePerOunce, setGoldPricePerOunce] = useState<number>(2330); // Default based on fallback
