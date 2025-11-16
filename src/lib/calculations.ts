@@ -1,33 +1,29 @@
 
 import type { FinancialData, ExchangeRates, Currency } from './types';
 
-export function convert(amount: number, fromCurrency: Currency | 'GOLD' | 'SILVER', toCurrency: Currency, exchangeRates: ExchangeRates): number {
-    if (typeof amount !== 'number' || isNaN(amount)) return 0;
-    
+// This function is now completely rewritten for clarity and correctness.
+export function convert(amount: number, from: Currency | 'GOLD' | 'SILVER', to: Currency, exchangeRates: ExchangeRates): number {
+    if (typeof amount !== 'number' || isNaN(amount) || amount === 0) return 0;
+
     let amountInUsd: number;
 
-    // For precious metals, we calculate their total value in USD first by multiplying.
-    if (fromCurrency === 'GOLD' || fromCurrency === 'SILVER') {
-        const pricePerGramInUsd = exchangeRates[fromCurrency];
+    // --- Step 1: Convert the input amount to a standard USD value ---
+    if (from === 'GOLD' || from === 'SILVER') {
+        // This is for a commodity (gold/silver).
+        // The 'amount' is in grams. We need to multiply by the price per gram.
+        const pricePerGramInUsd = exchangeRates[from]; // This is pre-calculated in the context.
         if (!pricePerGramInUsd) return 0;
         amountInUsd = amount * pricePerGramInUsd;
     } else {
-        // For regular currency conversions, convert to base currency (USD) by dividing.
-        if (fromCurrency === 'USD') {
-            amountInUsd = amount;
-        } else {
-            const rateFrom = exchangeRates[fromCurrency as Currency];
-            if (!rateFrom) return 0;
-            amountInUsd = amount / rateFrom;
-        }
+        // This is for a standard currency.
+        // We convert it to USD by dividing by its exchange rate relative to USD.
+        const rateFrom = exchangeRates[from as Currency];
+        if (!rateFrom) return 0;
+        amountInUsd = amount / rateFrom;
     }
 
-    // Now, convert from USD to the target currency
-    if (toCurrency === 'USD') {
-        return amountInUsd;
-    }
-
-    const rateTo = exchangeRates[toCurrency as Currency];
+    // --- Step 2: Convert the USD value to the target display currency ---
+    const rateTo = exchangeRates[to as Currency];
     if (!rateTo) return 0;
     
     return amountInUsd * rateTo;
