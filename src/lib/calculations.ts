@@ -17,34 +17,32 @@ export const rates: ExchangeRates = {
 export function convert(amount: number, fromCurrency: Currency | 'GOLD' | 'SILVER', toCurrency: Currency, exchangeRates: ExchangeRates): number {
     if (typeof amount !== 'number' || isNaN(amount)) return 0;
     
-    // For precious metals, we just need their price in USD per gram
+    let amountInUsd: number;
+
+    // For precious metals, we calculate their total value in USD first.
     if (fromCurrency === 'GOLD' || fromCurrency === 'SILVER') {
         const pricePerGramInUsd = exchangeRates[fromCurrency];
         if (!pricePerGramInUsd) return 0;
-        
-        const amountInUsd = amount * pricePerGramInUsd;
-        
-        // If target is USD, we are done. Otherwise convert from USD to target.
-        if (toCurrency === 'USD') return amountInUsd;
-        
-        const rateTo = exchangeRates[toCurrency];
-        if (!rateTo) return 0;
-        
-        return amountInUsd * rateTo;
+        amountInUsd = amount * pricePerGramInUsd;
+    } else {
+        // For regular currency conversions, convert to base currency (USD)
+        if (fromCurrency === 'USD') {
+            amountInUsd = amount;
+        } else {
+            const rateFrom = exchangeRates[fromCurrency];
+            if (!rateFrom) return 0;
+            amountInUsd = amount / rateFrom;
+        }
     }
 
-    // For regular currency conversions
-    if (fromCurrency === toCurrency) return amount;
-    
-    const rateFrom = exchangeRates[fromCurrency];
+    // Now, convert from USD to the target currency
+    if (toCurrency === 'USD') {
+        return amountInUsd;
+    }
+
     const rateTo = exchangeRates[toCurrency];
-
-    if (!rateFrom || !rateTo) return 0;
-
-    // First, convert the amount to a base currency (USD)
-    const amountInUsd = amount / rateFrom;
+    if (!rateTo) return 0;
     
-    // Then, convert from USD to the target currency
     return amountInUsd * rateTo;
 }
 
