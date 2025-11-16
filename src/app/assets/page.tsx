@@ -83,7 +83,7 @@ export default function AssetsPage() {
         const existingAsset = updatedData.assets[assetKey].find((a: GoldAsset | SilverAsset) => a.location === newAsset.location);
 
         if (existingAsset) {
-            existingAsset.grams += newAsset.grams;
+            existingAsset.grams = Number(existingAsset.grams) + Number(newAsset.grams);
         } else {
             const newId = `${type.substring(0, 2)}${new Date().getTime()}`;
             const assetWithId = { ...newAsset, id: newId };
@@ -406,7 +406,3 @@ export default function AssetsPage() {
     </>
   )
 }
-
-    
-
-    
