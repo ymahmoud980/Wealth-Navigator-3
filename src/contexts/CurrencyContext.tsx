@@ -22,7 +22,7 @@ export const CurrencyContext = createContext<CurrencyContextType | undefined>(un
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrency] = useState<Currency>('USD');
-  const [currencyRates] = useState<Omit<ExchangeRates, 'GOLD' | 'SILVER'>>({ USD: 1, EGP: 47.75, KWD: 0.3072, TRY: 41.88 });
+  const [currencyRates] = useState<Omit<ExchangeRates, 'GOLD_GRAM' | 'SILVER_GRAM'>>({ USD: 1, EGP: 47.75, KWD: 0.3072, TRY: 41.88 });
 
   // State for user-defined metal prices
   const [goldPricePerOunce, setGoldPricePerOunce] = useState<number>(2330);
@@ -35,8 +35,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     
     return {
       ...currencyRates,
-      GOLD: goldPricePerGram,
-      SILVER: silverPricePerGram,
+      GOLD_GRAM: goldPricePerGram,
+      SILVER_GRAM: silverPricePerGram,
     } as ExchangeRates;
   }, [currencyRates, goldPricePerOunce, silverPricePerOunce]);
 

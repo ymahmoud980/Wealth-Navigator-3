@@ -1,14 +1,13 @@
 
 import type { FinancialData, ExchangeRates, Currency } from './types';
 
-// This function is now completely rewritten for clarity and correctness.
-export function convert(amount: number, from: Currency | 'GOLD' | 'SILVER', to: Currency, exchangeRates: ExchangeRates): number {
+export function convert(amount: number, from: Currency | 'GOLD_GRAM' | 'SILVER_GRAM', to: Currency, exchangeRates: ExchangeRates): number {
     if (typeof amount !== 'number' || isNaN(amount) || amount === 0) return 0;
 
     let amountInUsd: number;
 
     // --- Step 1: Convert the input amount to a standard USD value ---
-    if (from === 'GOLD' || from === 'SILVER') {
+    if (from === 'GOLD_GRAM' || from === 'SILVER_GRAM') {
         // This is for a commodity (gold/silver).
         // The 'amount' is in grams. We need to multiply by the price per gram.
         const pricePerGramInUsd = exchangeRates[from]; // This is pre-calculated in the context.
@@ -31,14 +30,14 @@ export function convert(amount: number, from: Currency | 'GOLD' | 'SILVER', to: 
 
 
 export function calculateMetrics(data: FinancialData, displayCurrency: Currency, liveRates: ExchangeRates) {
-    const convertToDisplay = (amount: number, from: Currency | 'GOLD' | 'SILVER') => convert(amount, from, displayCurrency, liveRates);
+    const convertToDisplay = (amount: number, from: Currency | 'GOLD_GRAM' | 'SILVER_GRAM') => convert(amount, from, displayCurrency, liveRates);
 
     // --- ASSET CALCULATIONS ---
     const offPlanAssetsValue = (data.assets.underDevelopment || []).reduce((sum, p) => sum + convertToDisplay(p.currentValue, p.currency), 0);
     const existingRealEstateValue = (data.assets.realEstate || []).reduce((sum, p) => sum + convertToDisplay(p.currentValue, p.currency), 0);
     const cashValue = (data.assets.cash || []).reduce((sum, c) => sum + convertToDisplay(c.amount, c.currency), 0);
-    const goldValue = (data.assets.gold || []).reduce((sum, g) => sum + convertToDisplay(g.grams, "GOLD"), 0);
-    const silverValue = (data.assets.silver || []).reduce((sum, s) => sum + convertToDisplay(s.grams, "SILVER"), 0);
+    const goldValue = (data.assets.gold || []).reduce((sum, g) => sum + convertToDisplay(g.grams, "GOLD_GRAM"), 0);
+    const silverValue = (data.assets.silver || []).reduce((sum, s) => sum + convertToDisplay(s.grams, "SILVER_GRAM"), 0);
     const otherAssetsValue = (data.assets.otherAssets || []).reduce((sum, o) => sum + convertToDisplay(o.value, o.currency), 0);
 
     const totalAssets = existingRealEstateValue + offPlanAssetsValue + cashValue + goldValue + silverValue + otherAssetsValue;
