@@ -30,144 +30,117 @@ export default function AssetsPage() {
   const [deleteTarget, setDeleteTarget] = useState<{type: string, id: string} | null>(null);
 
   useEffect(() => {
-    setEditableData(JSON.parse(JSON.stringify(data)));
+    // When the global data changes (e.g., from an import), reset the editable data
+    // but only if we are not currently in editing mode.
+    if (!isEditing) {
+      setEditableData(JSON.parse(JSON.stringify(data)));
+    }
   }, [data, isEditing]);
 
 
   const handleEditClick = () => {
+    // When entering edit mode, create a fresh copy of the current global state.
+    setEditableData(JSON.parse(JSON.stringify(data)));
     setIsEditing(true);
   };
 
   const handleSaveClick = () => {
+    // When saving, push the edited data to the global context.
     setData(editableData);
     setIsEditing(false);
   };
   
   const handleCancelClick = () => {
-    setEditableData(JSON.parse(JSON.stringify(data)));
+    // When cancelling, discard the local edits and leave edit mode.
+    // The component will re-sync with the global state via the useEffect hook.
     setIsEditing(false);
   };
 
-  const handleRealEstateChange = (id: string, key: 'currentValue' | 'monthlyRent', value: string) => {
-    const numericValue = parseFloat(value) || 0;
-    const newData = JSON.parse(JSON.stringify(editableData));
-    const asset = newData.assets.realEstate.find((a: RealEstateAsset) => a.id === id);
-    if (asset) {
-      asset[key] = numericValue;
-      setEditableData(newData);
-    }
-  };
-  
-  const handleUnderDevelopmentChange = (id: string, key: 'currentValue' | 'purchasePrice', value: string) => {
-    const numericValue = parseFloat(value) || 0;
-    const newData = JSON.parse(JSON.stringify(editableData));
-    const asset = newData.assets.underDevelopment.find((a: UnderDevelopmentAsset) => a.id === id);
-    if (asset) {
-      asset[key] = numericValue;
-      setEditableData(newData);
-    }
+  // Generic handler to update a field in any asset list
+  const handleAssetChange = <T extends { id: string }>(
+    assetTypeKey: keyof FinancialData['assets'],
+    id: string,
+    field: keyof T,
+    value: string | number
+  ) => {
+    setEditableData(prevData => {
+      const newData = JSON.parse(JSON.stringify(prevData));
+      const assetList = newData.assets[assetTypeKey] as T[];
+      const asset = assetList.find(a => a.id === id);
+      if (asset) {
+        (asset[field] as any) = typeof (asset[field]) === 'number' ? parseFloat(value as string) || 0 : value;
+      }
+      return newData;
+    });
   };
 
-  const handleOtherAssetChange = (id: string, value: string) => {
-    const numericValue = parseFloat(value) || 0;
-    const newData = JSON.parse(JSON.stringify(editableData));
-    const asset = newData.assets.otherAssets.find((a: OtherAsset) => a.id === id);
-    if (asset) {
-      asset.value = numericValue;
-      setEditableData(newData);
-    }
-  };
-  
-  const handleCashChange = (id: string, value: string) => {
-    const numericValue = parseFloat(value) || 0;
-    const newData = JSON.parse(JSON.stringify(editableData));
-    const asset = newData.assets.cash.find((a: CashAsset) => a.id === id);
-    if (asset) {
-      asset.amount = numericValue;
-      setEditableData(newData);
-    }
-  };
-
-  const handleGoldChange = (id: string, value: string) => {
-    const numericValue = parseFloat(value) || 0;
-    const newData = JSON.parse(JSON.stringify(editableData));
-    const asset = newData.assets.gold.find((a: GoldAsset) => a.id === id);
-    if (asset) {
-      asset.grams = numericValue;
-      setEditableData(newData);
-    }
-  };
-
-  const handleSilverChange = (id: string, value: string) => {
-    const numericValue = parseFloat(value) || 0;
-    const newData = JSON.parse(JSON.stringify(editableData));
-    const asset = newData.assets.silver.find((a: SilverAsset) => a.id === id);
-    if (asset) {
-      asset.grams = numericValue;
-      setEditableData(newData);
-    }
-  };
-  
- const handleAddAsset = (newAsset: any, type: string) => {
+  const handleAddAsset = (newAsset: any, type: string) => {
     const newId = `${type.substring(0, 2)}${new Date().getTime()}`;
     const assetWithId = { ...newAsset, id: newId };
     
-    // Always update from the most current state, whether editing or not.
-    const baseData = isEditing ? editableData : data;
-    const updatedData = JSON.parse(JSON.stringify(baseData));
+    // Create a deep copy of the *current global data* to modify.
+    const updatedData = JSON.parse(JSON.stringify(data));
 
-    if (type === 'realEstate') {
-        if (!updatedData.assets.realEstate) updatedData.assets.realEstate = [];
-        updatedData.assets.realEstate.push(assetWithId as RealEstateAsset);
-    } else if (type === 'underDevelopment') {
-        if (!updatedData.assets.underDevelopment) updatedData.assets.underDevelopment = [];
-        updatedData.assets.underDevelopment.push(assetWithId as UnderDevelopmentAsset);
-    } else if (type === 'cash') {
-        if (!updatedData.assets.cash) updatedData.assets.cash = [];
-        updatedData.assets.cash.push(assetWithId as CashAsset);
-    } else if (type === 'gold') {
-        if (!updatedData.assets.gold) updatedData.assets.gold = [];
-        updatedData.assets.gold.push(assetWithId as GoldAsset);
-    } else if (type === 'silver') {
-        if (!updatedData.assets.silver) updatedData.assets.silver = [];
-        updatedData.assets.silver.push(assetWithId as SilverAsset);
-    } else if (type === 'other') {
-        if (!updatedData.assets.otherAssets) updatedData.assets.otherAssets = [];
-        updatedData.assets.otherAssets.push(assetWithId as OtherAsset);
-    }
+    const assetKeyMap: { [key: string]: keyof FinancialData['assets'] } = {
+        realEstate: 'realEstate',
+        underDevelopment: 'underDevelopment',
+        cash: 'cash',
+        gold: 'gold',
+        silver: 'silver',
+        other: 'otherAssets',
+    };
 
-    if (isEditing) {
-        setEditableData(updatedData);
-    } else {
+    const assetKey = assetKeyMap[type];
+
+    if (assetKey) {
+        if (!updatedData.assets[assetKey]) {
+            (updatedData.assets as any)[assetKey] = [];
+        }
+        (updatedData.assets[assetKey] as any[]).push(assetWithId);
+        
+        // Immediately update the global state. This makes the change visible everywhere.
         setData(updatedData);
+
+        // If in editing mode, also update the local editable state to keep it in sync.
+        if (isEditing) {
+            setEditableData(updatedData);
+        }
     }
     
     setIsAddAssetDialogOpen(false);
   };
 
+
   const handleDeleteConfirm = () => {
     if (!deleteTarget) return;
 
     const { type, id } = deleteTarget;
-    // Create a deep copy of the current data state to modify
+    // Always start with a fresh copy of the global data
     const updatedData = JSON.parse(JSON.stringify(data));
 
-    if (type === 'realEstate') {
-        updatedData.assets.realEstate = (updatedData.assets.realEstate || []).filter((item: RealEstateAsset) => item.id !== id);
-    } else if (type === 'underDevelopment') {
-        updatedData.assets.underDevelopment = (updatedData.assets.underDevelopment || []).filter((item: UnderDevelopmentAsset) => item.id !== id);
-    } else if (type === 'cash') {
-        updatedData.assets.cash = (updatedData.assets.cash || []).filter((item: CashAsset) => item.id !== id);
-    } else if (type === 'gold') {
-        updatedData.assets.gold = (updatedData.assets.gold || []).filter((item: GoldAsset) => item.id !== id);
-    } else if (type === 'silver') {
-        updatedData.assets.silver = (updatedData.assets.silver || []).filter((item: SilverAsset) => item.id !== id);
-    } else if (type === 'other') {
-        updatedData.assets.otherAssets = (updatedData.assets.otherAssets || []).filter((item: OtherAsset) => item.id !== id);
-    }
+    const assetKeyMap: { [key: string]: keyof FinancialData['assets'] } = {
+        realEstate: 'realEstate',
+        underDevelopment: 'underDevelopment',
+        cash: 'cash',
+        gold: 'gold',
+        silver: 'silver',
+        other: 'otherAssets',
+    };
 
-    // Pass the modified object directly to setData
+    const assetKey = assetKeyMap[type];
+
+    if (assetKey) {
+        const assetList = updatedData.assets[assetKey] as any[];
+        updatedData.assets[assetKey] = assetList.filter(item => item.id !== id);
+    }
+    
+    // Immediately update the global state.
     setData(updatedData);
+
+    // If in editing mode, sync the local state.
+    if (isEditing) {
+        setEditableData(updatedData);
+    }
 
     setDeleteTarget(null);
   };
@@ -175,6 +148,7 @@ export default function AssetsPage() {
 
   const formatNumber = (num: number) => num.toLocaleString();
 
+  // Determine which data to display based on the editing state.
   const currentData = isEditing ? editableData : data;
   const { realEstate, underDevelopment, cash, gold, silver, otherAssets } = currentData.assets;
   const { installments } = currentData.liabilities;
@@ -220,7 +194,7 @@ export default function AssetsPage() {
                               <Input 
                                   type="number" 
                                   defaultValue={p.currentValue}
-                                  onChange={(e) => handleRealEstateChange(p.id, 'currentValue', e.target.value)}
+                                  onChange={(e) => handleAssetChange('realEstate', p.id, 'currentValue', e.target.value)}
                                   className="h-8"
                               />
                             ) : (
@@ -233,7 +207,7 @@ export default function AssetsPage() {
                                <Input 
                                   type="number" 
                                   defaultValue={p.monthlyRent}
-                                  onChange={(e) => handleRealEstateChange(p.id, 'monthlyRent', e.target.value)}
+                                  onChange={(e) => handleAssetChange('realEstate', p.id, 'monthlyRent', e.target.value)}
                                   className="h-8"
                                   disabled={p.monthlyRent === 0 && !isEditing}
                                />
@@ -275,7 +249,7 @@ export default function AssetsPage() {
                                 <Input 
                                     type="number" 
                                     defaultValue={linkedInstallment?.total}
-                                    onChange={(e) => handleUnderDevelopmentChange(p.id, 'purchasePrice', e.target.value)}
+                                    onChange={(e) => handleAssetChange('underDevelopment', p.id, 'purchasePrice', e.target.value)}
                                     className="h-8"
                                     disabled // This should be driven by the installment data
                                 />
@@ -289,7 +263,7 @@ export default function AssetsPage() {
                                 <Input 
                                     type="number" 
                                     defaultValue={p.currentValue}
-                                    onChange={(e) => handleUnderDevelopmentChange(p.id, 'currentValue', e.target.value)}
+                                    onChange={(e) => handleAssetChange('underDevelopment', p.id, 'currentValue', e.target.value)}
                                     className="h-8"
                                 />
                                 ) : (
@@ -320,7 +294,7 @@ export default function AssetsPage() {
                                <Input 
                                   type="number" 
                                   defaultValue={c.amount}
-                                  onChange={(e) => handleCashChange(c.id, e.target.value)}
+                                  onChange={(e) => handleAssetChange('cash', c.id, 'amount', e.target.value)}
                                   className="h-8"
                                 />
                              ) : (
@@ -343,7 +317,7 @@ export default function AssetsPage() {
                                 <Input 
                                     type="number" 
                                     defaultValue={g.grams}
-                                    onChange={(e) => handleGoldChange(g.id, e.target.value)}
+                                    onChange={(e) => handleAssetChange('gold', g.id, 'grams', e.target.value)}
                                     className="h-8"
                                 />
                               ) : (
@@ -361,12 +335,12 @@ export default function AssetsPage() {
                           )}
                           <p className="font-bold">Silver <span className="font-normal text-muted-foreground">- {s.location}</span></p>
                           <div className="space-y-1">
-                              <label className="text-xs font-medium">Grams</label>
+                              <label className="text-xs font-medium">Grams</label>                              
                               {isEditing ? (
                                 <Input 
                                     type="number" 
                                     defaultValue={s.grams}
-                                    onChange={(e) => handleSilverChange(s.id, e.target.value)}
+                                    onChange={(e) => handleAssetChange('silver', s.id, 'grams', e.target.value)}
                                     className="h-8"
                                 />
                               ) : (
@@ -389,7 +363,7 @@ export default function AssetsPage() {
                                   <Input 
                                       type="number" 
                                       defaultValue={o.value}
-                                      onChange={(e) => handleOtherAssetChange(o.id, e.target.value)}
+                                      onChange={(e) => handleAssetChange('otherAssets', o.id, 'value', e.target.value)}
                                       className="h-8"
                                   />
                                 ) : (
@@ -424,3 +398,5 @@ export default function AssetsPage() {
     </>
   )
 }
+
+    
