@@ -10,12 +10,30 @@ export const rates: ExchangeRates = {
     EGP: 47.75, 
     KWD: 0.3072,
     TRY: 41.88,
-    GOLD: 128.64, // Fallback price per gram
-    SILVER: 1.553, // Fallback price per gram
+    GOLD: 75, // Fallback price per gram
+    SILVER: 0.96, // Fallback price per gram
 };
 
 export function convert(amount: number, fromCurrency: Currency | 'GOLD' | 'SILVER', toCurrency: Currency, exchangeRates: ExchangeRates): number {
     if (typeof amount !== 'number' || isNaN(amount)) return 0;
+    
+    // For precious metals, we just need their price in USD per gram
+    if (fromCurrency === 'GOLD' || fromCurrency === 'SILVER') {
+        const pricePerGramInUsd = exchangeRates[fromCurrency];
+        if (!pricePerGramInUsd) return 0;
+        
+        const amountInUsd = amount * pricePerGramInUsd;
+        
+        // If target is USD, we are done. Otherwise convert from USD to target.
+        if (toCurrency === 'USD') return amountInUsd;
+        
+        const rateTo = exchangeRates[toCurrency];
+        if (!rateTo) return 0;
+        
+        return amountInUsd * rateTo;
+    }
+
+    // For regular currency conversions
     if (fromCurrency === toCurrency) return amount;
     
     const rateFrom = exchangeRates[fromCurrency];
@@ -24,9 +42,7 @@ export function convert(amount: number, fromCurrency: Currency | 'GOLD' | 'SILVE
     if (!rateFrom || !rateTo) return 0;
 
     // First, convert the amount to a base currency (USD)
-    const amountInUsd = fromCurrency === 'GOLD' || fromCurrency === 'SILVER'
-      ? amount * rateFrom // For precious metals, it's a direct multiplication (grams * price_per_gram)
-      : amount / rateFrom; // For currencies, we divide to get to the base
+    const amountInUsd = amount / rateFrom;
     
     // Then, convert from USD to the target currency
     return amountInUsd * rateTo;
