@@ -294,7 +294,7 @@ export default function AssetsPage() {
                 <h3 className="text-xl font-semibold mb-4">Cash, Metals &amp; Other Assets</h3>
                 <div className="space-y-4">
                   {/* Cash Holdings */}
-                  <Card style={{backgroundImage: "url('https://www.transparenttextures.com/patterns/dollar.png')"}}>
+                  <Card className="bg-green-100/40 dark:bg-green-900/30">
                       <CardHeader><CardTitle className="text-lg">Cash Holdings</CardTitle></CardHeader>
                       <CardContent className="space-y-2">
                           {(cash || []).map(item => (
@@ -439,3 +439,4 @@ export default function AssetsPage() {
     
 
     
+
