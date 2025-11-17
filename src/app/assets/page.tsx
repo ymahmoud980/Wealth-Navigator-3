@@ -30,8 +30,7 @@ export default function AssetsPage() {
   const [deleteTarget, setDeleteTarget] = useState<{type: string, id: string} | null>(null);
 
   useEffect(() => {
-    // When editing is finished, or if the original data changes from the context,
-    // we want to ensure the editableData is up-to-date.
+    // When not editing, ensure the editableData reflects the main data from context.
     if (!isEditing) {
         setEditableData(JSON.parse(JSON.stringify(data)));
     }
@@ -39,7 +38,8 @@ export default function AssetsPage() {
 
 
   const handleEditClick = () => {
-    setEditableData(JSON.parse(JSON.stringify(data))); // Ensure fresh data on edit start
+    // Clone data for editing to avoid direct mutation
+    setEditableData(JSON.parse(JSON.stringify(data)));
     setIsEditing(true);
   };
 
@@ -49,6 +49,8 @@ export default function AssetsPage() {
   };
   
   const handleCancelClick = () => {
+    // Revert changes by resetting editableData to the original data
+    setEditableData(JSON.parse(JSON.stringify(data)));
     setIsEditing(false);
   };
 
@@ -59,13 +61,23 @@ export default function AssetsPage() {
     value: string | number
   ) => {
     setEditableData(prevData => {
-      const newData = JSON.parse(JSON.stringify(prevData));
-      const assetList = newData.assets[assetTypeKey] as T[];
-      const asset = assetList.find(a => a.id === id);
-      if (asset) {
-        (asset[field] as any) = typeof (asset[field]) === 'number' ? parseFloat(value as string) || 0 : value;
-      }
-      return newData;
+        const assetList = prevData.assets[assetTypeKey] as T[];
+        const updatedAssetList = assetList.map(asset => {
+            if (asset.id === id) {
+                const updatedAsset = { ...asset };
+                (updatedAsset[field] as any) = typeof (asset[field]) === 'number' ? parseFloat(value as string) || 0 : value;
+                return updatedAsset;
+            }
+            return asset;
+        });
+
+        return {
+            ...prevData,
+            assets: {
+                ...prevData.assets,
+                [assetTypeKey]: updatedAssetList,
+            },
+        };
     });
   };
 
@@ -80,12 +92,9 @@ export default function AssetsPage() {
             if (type === 'gold' || type === 'silver') {
                 existingAsset.grams = Number(existingAsset.grams) + Number(newAsset.grams);
             } else { // cash
-                 // For cash, if currencies match, add amounts. Otherwise, do nothing for now.
-                 // A more complex implementation could create a new entry if currency is different.
                  if (existingAsset.currency === newAsset.currency) {
                     existingAsset.amount = Number(existingAsset.amount) + Number(newAsset.amount);
                  } else {
-                    // If currency is different for the same location, create a new entry
                     const newId = `${type.substring(0, 2)}${new Date().getTime()}`;
                     const assetWithId = { ...newAsset, id: newId };
                     (updatedData.assets[assetKey] as any[]).push(assetWithId);
@@ -417,5 +426,3 @@ export default function AssetsPage() {
     </>
   )
 }
-
-    
