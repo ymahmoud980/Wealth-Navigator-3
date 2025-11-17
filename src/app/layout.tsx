@@ -1,13 +1,7 @@
 
 import type { Metadata } from 'next';
 import './globals.css';
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
-import { AppHeader } from '@/components/AppHeader';
-import { CurrencyProvider } from '@/contexts/CurrencyContext';
-import { FinancialDataProvider } from '@/contexts/FinancialDataContext';
-import { Toaster } from "@/components/ui/toaster";
-import { AuthProvider } from '@/contexts/AuthContext';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: 'Wealth Navigator',
@@ -36,20 +30,9 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
       </head>
       <body className="font-body antialiased">
-        <AuthProvider>
-          <CurrencyProvider>
-            <FinancialDataProvider>
-              <SidebarProvider>
-                <AppSidebar />
-                <SidebarInset className="min-h-screen">
-                  <AppHeader />
-                  <main className="p-4 md:p-6 lg:p-8">{children}</main>
-                </SidebarInset>
-              </SidebarProvider>
-            </FinancialDataProvider>
-          </CurrencyProvider>
-        </AuthProvider>
-        <Toaster />
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

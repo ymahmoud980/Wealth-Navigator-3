@@ -23,7 +23,7 @@ export const CurrencyContext = createContext<CurrencyContextType | undefined>(un
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrency] = useState<Currency>('USD');
 
-  // Base currency rates are stable and can be defined outside the component.
+  // Base currency rates need to be part of the component's render cycle to be included in useMemo's dependencies correctly.
   const currencyRates: Omit<ExchangeRates, 'GOLD_GRAM' | 'SILVER_GRAM'> = { 
     USD: 1, 
     EGP: 47.75, 
@@ -72,7 +72,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       GOLD_GRAM: goldPricePerGram,
       SILVER_GRAM: silverPricePerGram,
     } as ExchangeRates;
-  }, [goldPricePerOunce, silverPricePerOunce]);
+    // Adding currencyRates to the dependency array is critical.
+  }, [goldPricePerOunce, silverPricePerOunce, currencyRates]);
 
 
   const format = (value: number) => {
