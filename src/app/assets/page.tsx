@@ -294,11 +294,11 @@ export default function AssetsPage() {
                 <h3 className="text-xl font-semibold mb-4">Cash, Metals &amp; Other Assets</h3>
                 <div className="space-y-4">
                   {/* Cash Holdings */}
-                  <Card>
+                  <Card style={{backgroundImage: "url('https://www.transparenttextures.com/patterns/dollar.png')"}}>
                       <CardHeader><CardTitle className="text-lg">Cash Holdings</CardTitle></CardHeader>
                       <CardContent className="space-y-2">
                           {(cash || []).map(item => (
-                              <div key={item.id} className="group relative p-3 bg-secondary rounded-md">
+                              <div key={item.id} className="group relative p-3 bg-secondary/80 rounded-md">
                                 {isEditing && (
                                   <Button variant="ghost" size="icon" className="absolute top-1 right-1 h-6 w-6 text-destructive/60 hover:text-destructive" onClick={() => setDeleteTarget({ type: 'cash', id: item.id })}>
                                       <Trash2 className="h-4 w-4" />
@@ -435,5 +435,7 @@ export default function AssetsPage() {
     </>
   )
 }
+
+    
 
     
