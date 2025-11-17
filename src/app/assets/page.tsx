@@ -30,16 +30,15 @@ export default function AssetsPage() {
   const [deleteTarget, setDeleteTarget] = useState<{type: string, id: string} | null>(null);
 
   useEffect(() => {
-    // When not editing, ensure the editableData reflects the main data from context.
-    if (!isEditing) {
+    // When editing starts, copy the main data to the editable state.
+    // This prevents re-copying on every render while editing.
+    if (isEditing) {
         setEditableData(JSON.parse(JSON.stringify(data)));
     }
-  }, [data, isEditing]);
+  }, [isEditing, data]);
 
 
   const handleEditClick = () => {
-    // Clone data for editing to avoid direct mutation
-    setEditableData(JSON.parse(JSON.stringify(data)));
     setIsEditing(true);
   };
 
@@ -49,9 +48,8 @@ export default function AssetsPage() {
   };
   
   const handleCancelClick = () => {
-    // Revert changes by resetting editableData to the original data
-    setEditableData(JSON.parse(JSON.stringify(data)));
     setIsEditing(false);
+    // No need to reset data here; the useEffect will handle it when editing starts again.
   };
 
   const handleAssetChange = <T extends { id: string }>(
@@ -65,7 +63,10 @@ export default function AssetsPage() {
         const updatedAssetList = assetList.map(asset => {
             if (asset.id === id) {
                 const updatedAsset = { ...asset };
-                (updatedAsset[field] as any) = typeof (asset[field]) === 'number' ? parseFloat(value as string) || 0 : value;
+                // Correctly handle type conversion for numeric fields
+                (updatedAsset[field] as any) = typeof asset[field] === 'number'
+                    ? parseFloat(value as string) || 0
+                    : value;
                 return updatedAsset;
             }
             return asset;
