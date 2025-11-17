@@ -29,31 +29,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    // This function will be called to unsubscribe from the auth state listener
+    let unsubscribe: () => void;
+
     const initializeAuth = async () => {
       try {
         await setPersistence(auth, browserSessionPersistence);
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        // Assign the unsubscribe function returned by onAuthStateChanged
+        unsubscribe = onAuthStateChanged(auth, (user) => {
           setUser(user);
           if (!user) {
             setUserData(null);
             setLoading(false);
           }
         });
-        return unsubscribe;
       } catch (error) {
         console.error("Error setting auth persistence:", error);
         setLoading(false);
       }
     };
 
-    const unsubscribePromise = initializeAuth();
+    initializeAuth();
 
+    // Return a cleanup function that calls the unsubscribe method
     return () => {
-      unsubscribePromise.then(unsubscribe => {
-        if (unsubscribe) {
-          unsubscribe();
-        }
-      });
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
   }, []);
 
@@ -115,3 +117,4 @@ export const useAuth = () => {
   }
   return context;
 };
+
