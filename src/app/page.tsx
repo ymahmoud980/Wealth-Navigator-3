@@ -29,7 +29,8 @@ import {
   Eye, 
   EyeOff, 
   ShieldCheck,
-  PieChart
+  PieChart,
+  Activity
 } from "lucide-react";
 
 // Components
@@ -39,19 +40,24 @@ import { UpcomingPayments } from "@/components/dashboard/UpcomingPayments";
 import { UpcomingRents } from "@/components/dashboard/UpcomingRents";
 import { PriceControlCard } from "@/components/dashboard/PriceControlCard";
 
-// Data
+// Data & Context
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { emptyFinancialData } from "@/lib/data";
+import { fetchLiveRates, MarketRates, initialRates } from "@/lib/marketPrices";
 
 export default function DashboardPage() {
   const { data, setData, metrics } = useFinancialData();
   const [isClearAlertOpen, setIsClearAlertOpen] = useState(false);
   const [privacyMode, setPrivacyMode] = useState(false);
   const [mounted, setMounted] = useState(false);
+  
+  // State for Real-Time Market Data
+  const [marketRates, setMarketRates] = useState<MarketRates>(initialRates);
 
-  // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
+    // Fetch live market rates when page loads
+    fetchLiveRates().then(setMarketRates);
   }, []);
 
   const handleClearData = () => {
@@ -60,14 +66,8 @@ export default function DashboardPage() {
   }
 
   const handleExport = () => {
-    alert("Preparing your PDF Wealth Report...");
-    // In a real app, you would trigger a PDF generation function here
+    alert("Generating PDF Report based on current assets...");
   }
-
-  // Helper to obscure numbers if privacy mode is on
-  const secureValue = (val: number) => privacyMode ? -1 : val; 
-  // Note: We pass -1 or a flag, assuming StatCard handles formatting. 
-  // If StatCard is rigid, we use the CSS blur class on the container below.
 
   if (!mounted) return null;
 
@@ -104,6 +104,39 @@ export default function DashboardPage() {
           </Button>
         </div>
       </header>
+
+      {/* --- LIVE MARKET TICKER (NEW) --- */}
+      <div className="flex items-center gap-6 overflow-x-auto whitespace-nowrap text-xs font-mono text-muted-foreground py-3 px-4 border-y border-white/5 bg-black/20 rounded-lg no-scrollbar">
+        <span className="flex items-center gap-2 text-primary font-bold">
+          <Activity className="h-3 w-3" /> LIVE MARKET:
+        </span>
+        
+        <span className="flex items-center gap-1">
+          <span className="text-slate-400">USD/EUR:</span>
+          <span className="text-emerald-400 font-bold">{marketRates.EUR}</span>
+        </span>
+
+        <span className="w-px h-3 bg-white/10"></span>
+
+        <span className="flex items-center gap-1">
+          <span className="text-slate-400">USD/GBP:</span>
+          <span className="text-emerald-400 font-bold">{marketRates.GBP}</span>
+        </span>
+
+        <span className="w-px h-3 bg-white/10"></span>
+
+        <span className="flex items-center gap-1">
+          <span className="text-slate-400">GOLD (oz):</span>
+          <span className="text-amber-500 font-bold">${marketRates.Gold.toFixed(2)}</span>
+        </span>
+
+        <span className="w-px h-3 bg-white/10"></span>
+
+        <span className="flex items-center gap-1">
+          <span className="text-slate-400">SILVER (oz):</span>
+          <span className="text-slate-300 font-bold">${marketRates.Silver.toFixed(2)}</span>
+        </span>
+      </div>
 
       {/* --- KEY STATS ROW --- */}
       <div className={`grid gap-6 md:grid-cols-2 lg:grid-cols-4 transition-all duration-500 ${privacyMode ? "blur-sm" : ""}`}>
