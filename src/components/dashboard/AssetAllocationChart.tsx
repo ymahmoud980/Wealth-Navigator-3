@@ -1,3 +1,4 @@
+// Final V3 Chart Colors
 "use client";
 
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from "recharts";
