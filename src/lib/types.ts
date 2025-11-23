@@ -1,20 +1,36 @@
+export type Currency = string;
 
-export type Currency = 'EGP' | 'USD' | 'KWD' | 'TRY' | string;
+export interface Installment {
+  id: string;
+  project: string;
+  developer: string;
+  total: number;
+  paid: number;
+  amount: number; // Next Installment Amount
+  nextDueDate: string;
+  currency: Currency;
+  frequency: 'Monthly' | 'Quarterly' | 'Semi-Annual' | 'Annual';
+}
 
-export type ExchangeRates = {
-  [key in Currency | 'GOLD_GRAM' | 'SILVER_GRAM']: number;
-};
+export interface Loan {
+  id: string;
+  lender: string;
+  initial: number;
+  remaining: number;
+  monthlyPayment: number;
+  currency: Currency;
+}
 
 export interface RealEstateAsset {
   id: string;
   name: string;
   location: string;
   currentValue: number;
+  purchasePrice: number;
   currency: Currency;
   monthlyRent: number;
   rentCurrency?: Currency;
-  rentDueDay: number;
-  rentFrequency: 'monthly' | 'semi-annual';
+  rentFrequency: 'monthly' | 'quarterly' | 'semi-annual' | 'annual';
   nextRentDueDate: string;
 }
 
@@ -25,25 +41,25 @@ export interface UnderDevelopmentAsset {
   purchasePrice: number;
   currentValue: number;
   currency: Currency;
-  linkedInstallmentId: string;
+  linkedInstallmentId?: string;
 }
 
 export interface CashAsset {
   id: string;
-  location: string;
+  location: string; // Bank Name or "Wallet"
   amount: number;
   currency: Currency;
 }
 
 export interface GoldAsset {
   id: string;
-  location: 'Egypt' | 'Kuwait' | 'Turkey' | 'Other';
+  location: string;
   grams: number;
 }
 
 export interface SilverAsset {
   id: string;
-  location: 'Egypt' | 'Kuwait' | 'Turkey' | 'Other';
+  location: string;
   grams: number;
 }
 
@@ -54,85 +70,31 @@ export interface OtherAsset {
   currency: Currency;
 }
 
-export interface Salary {
-    id: string;
-    amount: number;
-    currency: Currency;
-}
-
-export interface Assets {
-  realEstate: RealEstateAsset[];
-  underDevelopment: UnderDevelopmentAsset[];
-  cash: CashAsset[];
-  gold: GoldAsset[];
-  silver: SilverAsset[];
-  otherAssets: OtherAsset[];
-  salary: Salary;
-}
-
-export interface Loan {
-  id: string;
-  lender: string;
-  initial: number;
-  remaining: number;
-  currency: Currency;
-  monthlyPayment: number;
-  finalPayment: string;
-}
-
-export interface Installment {
-  id: string;
-  project: string;
-  developer: string;
-  total: number;
-  paid: number;
-  currency: Currency;
-  nextDueDate: string;
-  amount: number;
-  frequency: 'Annual' | 'Semi-Annual' | 'Quarterly';
-}
-
-export interface Liabilities {
-  loans: Loan[];
-  installments: Installment[];
-}
-
 export interface HouseholdExpense {
-    id: string;
-    description: string;
-    amount: number;
-    currency: Currency;
-}
-export interface MonthlyExpenses {
-    household: HouseholdExpense[];
-}
-
-export interface HistoryEntry {
-  date: string; // ISO string
-  netWorth: number;
-  totalAssets: number;
-  totalLiabilities: number;
-  netCashFlow: number;
+  id: string;
+  description: string;
+  amount: number;
+  currency: Currency;
 }
 
 export interface FinancialData {
-    assets: Assets;
-    liabilities: Liabilities;
-    monthlyExpenses: MonthlyExpenses;
-    history: HistoryEntry[];
-    lastUpdated?: any;
+  assets: {
+    realEstate: RealEstateAsset[];
+    underDevelopment: UnderDevelopmentAsset[];
+    cash: CashAsset[];
+    gold: GoldAsset[];
+    silver: SilverAsset[];
+    otherAssets: OtherAsset[];
+    salary: { amount: number; currency: Currency };
+  };
+  liabilities: {
+    loans: Loan[];
+    installments: Installment[];
+  };
+  monthlyExpenses: {
+    household: HouseholdExpense[];
+  };
 }
 
-export interface DocumentedItem { 
-  id: string;
-  name: string;
-};
-
-export interface UserData {
-  uid: string;
-  name: string;
-  email: string;
-  role: 'user' | 'admin';
-  createdAt: string;
-  lastLogin?: string;
-}
+// Ensure ExchangeRates is compatible with our MarketRates
+export type ExchangeRates = any;

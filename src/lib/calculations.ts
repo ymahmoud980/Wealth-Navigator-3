@@ -1,39 +1,34 @@
 import type { FinancialData, Currency } from './types';
 import type { ExchangeRates } from './types';
 
-// Constants for Precious Metals Math
+// Constants
 const GRAMS_PER_OUNCE = 31.1035;
 
 /**
- * Converts any asset value to the display currency.
- * INTELLIGENTLY HANDLES LIVE GOLD/SILVER PRICES.
+ * Converts value to display currency.
+ * Includes SAFETY SHIELDS to prevent crashes if data is missing.
  */
 export const convert = (
   amount: number,
-  from: string, // Using string to allow special keys like 'GOLD_GRAM'
+  from: string,
   to: string,
-  rates: any // Using 'any' to ensure we can read .Gold/.Silver from live data
+  rates: any
 ): number => {
-  if (from === to) {
-    return amount;
+  // --- SAFETY SHIELD ---
+  // If rates are missing (during loading), return 0 instead of crashing
+  if (!rates || typeof rates !== 'object') {
+    return 0;
   }
+  
+  // If no conversion needed
+  if (from === to) return amount;
 
   // --- 1. SPECIAL LOGIC FOR LIVE METALS ---
-  // Your Live Market Ticker gives prices in $/Ounce (USD).
-  // Your Assets are stored in Grams.
-  // We must convert Grams -> Ounces -> USD first.
-
   if (from === 'GOLD_GRAM') {
-    // Grab live price from the ticker data, or 0 if missing
+    // Safety: Default to 0 if Gold price is missing
     const goldPricePerOunce = rates.Gold || 0; 
-    
-    // Math: (Price/Oz) / 31.1035 = Price/Gram
     const pricePerGram = goldPricePerOunce / GRAMS_PER_OUNCE;
-    
-    // Value in USD = Grams Owned * Price Per Gram
     const valueInUSD = amount * pricePerGram;
-    
-    // Finally, convert that USD value to your display currency (e.g., EUR)
     return convert(valueInUSD, 'USD', to, rates);
   }
 
@@ -45,28 +40,31 @@ export const convert = (
   }
 
   // --- 2. STANDARD CURRENCY LOGIC ---
-  // (Base currency is always USD in this system)
-
-  // Step A: Convert from Source to USD
-  // Example: You have 100 EUR. Rate is 0.92. 
-  // 100 EUR / 0.92 = 108.69 USD
   const fromRate = rates[from] || 1;
   const amountInUSD = amount / fromRate;
 
-  // Step B: Convert USD to Target
-  // Example: Convert that USD to GBP (Rate 0.79)
-  // 108.69 USD * 0.79 = 85.86 GBP
   const toRate = rates[to] || 1;
 
   return amountInUSD * toRate;
 };
 
-
 /**
- * Aggregates all data into the metrics used by the Dashboard.
- * (This part was perfect in your previous file, keeping it exactly as is)
+ * Metric Calculation
+ * (Standard logic, relies on the safe convert function above)
  */
 export const calculateMetrics = (data: FinancialData, displayCurrency: Currency, rates: ExchangeRates) => {
+    // If data is missing (startup), return a safe empty object
+    if (!data || !data.assets) {
+       return {
+          netWorth: 0, totalAssets: 0, totalLiabilities: 0, netCashFlow: 0,
+          totalIncome: 0, totalExpenses: 0,
+          assets: { existingRealEstate: 0, offPlanRealEstate: 0, cash: 0, gold: 0, silver: 0, other: 0 },
+          liabilities: { loans: 0, installments: 0 },
+          income: { salary: 0, rent: 0 },
+          expenses: { loans: 0, household: 0, installmentsAvg: 0 }
+       };
+    }
+
     const { assets, liabilities, monthlyExpenses } = data;
 
     // --- ASSETS ---

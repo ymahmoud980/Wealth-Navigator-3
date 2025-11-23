@@ -2,17 +2,34 @@
 
 import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 import type { FinancialData } from "@/lib/types";
-import { defaultFinancialData, emptyFinancialData } from "@/lib/data";
 import { calculateMetrics } from "@/lib/calculations";
 import { fetchLiveRates, initialRates, MarketRates } from "@/lib/marketPrices";
 
-// Define the Context Shape
+// --- 1. DEFINE SAFE DEFAULTS INLINE (Prevents crash if import fails) ---
+const SAFE_DEFAULT_DATA: FinancialData = {
+  assets: {
+    realEstate: [],
+    underDevelopment: [],
+    cash: [],
+    gold: [],
+    silver: [],
+    otherAssets: [],
+    salary: { amount: 0, currency: 'USD' }
+  },
+  liabilities: {
+    loans: [],
+    installments: []
+  },
+  monthlyExpenses: {
+    household: []
+  }
+};
+
 interface FinancialDataContextType {
   data: FinancialData;
   setData: (data: FinancialData) => void;
   metrics: ReturnType<typeof calculateMetrics>;
   loading: boolean;
-  // We add Currency controls directly here to ensure sync
   currency: string;
   setCurrency: (currency: string) => void;
   rates: MarketRates;
@@ -21,52 +38,60 @@ interface FinancialDataContextType {
 const FinancialDataContext = createContext<FinancialDataContextType | undefined>(undefined);
 
 export function FinancialDataProvider({ children }: { children: React.ReactNode }) {
-  // 1. App State
-  const [data, setData] = useState<FinancialData>(defaultFinancialData);
+  // Use the inline safe default
+  const [data, setData] = useState<FinancialData>(SAFE_DEFAULT_DATA);
   const [currency, setCurrency] = useState("USD");
-  const [rates, setRates] = useState<MarketRates>(initialRates);
+  const [rates, setRates] = useState<MarketRates>(initialRates || { USD: 1, EUR: 0.92, GBP: 0.79, Gold: 2000, Silver: 25 });
   const [loading, setLoading] = useState(true);
 
-  // 2. Fetch Live Rates on Mount
+  // 1. Load Live Rates
   useEffect(() => {
     async function loadRates() {
       try {
         const liveData = await fetchLiveRates();
-        setRates(liveData);
+        if (liveData && liveData.USD) {
+          setRates(liveData);
+        }
       } catch (e) {
-        console.error("Failed to load rates, using defaults");
-      } finally {
-        setLoading(false);
+        console.warn("Using default rates");
       }
+      setLoading(false);
     }
     loadRates();
-    
-    // Optional: Refresh rates every 60 seconds
-    const interval = setInterval(loadRates, 60000);
+    const interval = setInterval(loadRates, 60000); 
     return () => clearInterval(interval);
   }, []);
 
-  // 3. Load Data from LocalStorage on Mount
+  // 2. Load User Data
   useEffect(() => {
-    const saved = localStorage.getItem("wealth_navigator_data_v3");
-    if (saved) {
-      try {
-        setData(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse saved data");
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem("wealth_navigator_data_v3");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          // Safety check: ensure it has the main keys
+          if (parsed && parsed.assets) {
+            setData(parsed);
+          }
+        } catch (e) {
+          console.error("Data load error", e);
+        }
       }
     }
   }, []);
 
-  // 4. Save Data to LocalStorage whenever it changes
+  // 3. Save User Data
   useEffect(() => {
-    localStorage.setItem("wealth_navigator_data_v3", JSON.stringify(data));
+    if (typeof window !== 'undefined' && data) {
+      localStorage.setItem("wealth_navigator_data_v3", JSON.stringify(data));
+    }
   }, [data]);
 
-  // 5. REACTIVE CALCULATION (The Fix)
-  // This recalculates metrics AUTOMATICALLY whenever Data, Currency, OR Rates change.
+  // 4. Calculate Metrics
   const metrics = useMemo(() => {
-    return calculateMetrics(data, currency, rates);
+    // Double safety check
+    const safeData = data || SAFE_DEFAULT_DATA;
+    return calculateMetrics(safeData, currency, rates);
   }, [data, currency, rates]);
 
   return (

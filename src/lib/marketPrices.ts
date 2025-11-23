@@ -1,42 +1,45 @@
+// src/lib/marketPrices.ts
+
 export interface MarketRates {
   USD: number;
   EUR: number;
   GBP: number;
-  Gold: number; // USD per Ounce
-  Silver: number; // USD per Ounce
-  BTC: number; // Bitcoin
+  Gold: number;   // Price per Ounce in USD
+  Silver: number; // Price per Ounce in USD
+  [key: string]: number; // Allow dynamic access
 }
 
-// Base values adjusted for high-inflation/bull market scenario
+// These are the default values the app uses before it fetches live data
+// CRITICAL: The Context needs this variable "initialRates" to exist!
 export const initialRates: MarketRates = {
   USD: 1,
-  EUR: 0.91, 
-  GBP: 0.78,
-  Gold: 4050.00,   // User specified > 4000
-  Silver: 52.50,   // User specified ~50
-  BTC: 98500.00    // Added Crypto context
+  EUR: 0.92,
+  GBP: 0.79,
+  Gold: 4050.00,  // Approx current price
+  Silver: 52.50   // Approx current price
 };
 
 export async function fetchLiveRates(): Promise<MarketRates> {
   try {
-    // 1. Fetch Real Currency Data (Free API)
-    const currencyResponse = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-    const currencyData = await currencyResponse.json();
+    // 1. Fetch Currency (Free API)
+    // We try/catch inside here so if the API fails, the app doesn't crash
+    const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+    const data = await res.json();
 
-    // 2. Simulate Live Fluctuation for Metals (Since real Metal APIs are expensive paid services)
-    // This adds a random volatility between -0.8% and +0.8% every time you refresh
+    // 2. Fluctuation Logic for Metals (Simulating live ticker)
     const volatility = () => 1 + (Math.random() * 0.016 - 0.008);
     
     return {
       USD: 1,
-      EUR: currencyData.rates.EUR || 0.91,
-      GBP: currencyData.rates.GBP || 0.78,
+      EUR: data.rates.EUR || 0.92,
+      GBP: data.rates.GBP || 0.79,
       Gold: 4050.00 * volatility(),
       Silver: 52.50 * volatility(),
-      BTC: 98500.00 * volatility()
+      // Spread existing currency data so nothing breaks
+      ...data.rates 
     };
   } catch (error) {
-    console.error("Using offline market data", error);
+    console.warn("Could not fetch live rates, using defaults.");
     return initialRates;
   }
 }
