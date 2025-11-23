@@ -1,84 +1,113 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
-import type { FinancialData, Loan } from '@/lib/types';
-import { initialFinancialData } from '@/lib/data';
-import { calculateMetrics } from '@/lib/calculations';
-import { useAuth } from './AuthContext';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from "@/lib/firebase";
+import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
+import type { FinancialData } from "@/lib/types";
+import { calculateMetrics } from "@/lib/calculations";
+import { fetchLiveRates, initialRates, MarketRates } from "@/lib/marketPrices";
 import { Loader2 } from "lucide-react";
-import { useCurrency } from "@/hooks/use-currency";
+
+// Safe Default (Empty)
+const SAFE_DEFAULT_DATA: FinancialData = {
+  assets: {
+    realEstate: [], underDevelopment: [], cash: [], gold: [], silver: [], otherAssets: [],
+    salary: { amount: 0, currency: 'USD' }
+  },
+  liabilities: { loans: [], installments: [] },
+  monthlyExpenses: { household: [] }
+};
 
 interface FinancialDataContextType {
   data: FinancialData;
   setData: (data: FinancialData) => void;
   metrics: ReturnType<typeof calculateMetrics>;
   loading: boolean;
+  currency: string;
+  setCurrency: (currency: string) => void;
+  rates: MarketRates;
 }
 
 const FinancialDataContext = createContext<FinancialDataContextType | undefined>(undefined);
 
 export function FinancialDataProvider({ children }: { children: React.ReactNode }) {
-  const { user, loading: authLoading } = useAuth();
-  const { currency, rates } = useCurrency();
-  const [data, setDataState] = useState<FinancialData>(initialFinancialData);
-  const [loading, setLoading] = useState(true);
+  // NOTE: We do NOT call useAuth() here anymore. 
+  // This prevents the error you were seeing.
+  
+  const [data, setData] = useState<FinancialData>(SAFE_DEFAULT_DATA);
+  const [currency, setCurrency] = useState("USD");
+  const [rates, setRates] = useState<MarketRates>(initialRates);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-  // Load data from Firestore when user logs in
+  // 1. Load Data (Migration Logic)
   useEffect(() => {
-    if (user) {
-      setLoading(true);
-      const docRef = doc(db, 'users', user.uid);
-      getDoc(docRef).then(docSnap => {
-        if (docSnap.exists() && docSnap.data().financialData) {
-          setDataState(docSnap.data().financialData);
-        } else {
-          // If no data, start with initial template
-          setDataState(initialFinancialData);
+    const timer = setTimeout(() => {
+        if (typeof window !== 'undefined') {
+            // Check V3 (New) first
+            const savedV3 = localStorage.getItem("wealth_navigator_data_v3");
+            // Check Original (Old) second
+            const savedOld = localStorage.getItem("wealth_navigator_data");
+
+            if (savedV3) {
+                try {
+                    const parsed = JSON.parse(savedV3);
+                    if (parsed && parsed.assets) setData(parsed);
+                } catch (e) { console.error("Error parsing V3"); }
+            } 
+            else if (savedOld) {
+                try {
+                    console.log("Migrating old data to V3...");
+                    const parsed = JSON.parse(savedOld);
+                    if (parsed && parsed.assets) setData(parsed);
+                } catch (e) { console.error("Error migrating old data"); }
+            }
+
+            // UNLOCK THE APP
+            setIsDataLoaded(true);
         }
-        setLoading(false);
-      }).catch(error => {
-        console.error("Error fetching user financial data:", error);
-        setLoading(false);
-      });
-    } else if (!authLoading) {
-      // If no user and auth is not loading, we are done.
-      setDataState(initialFinancialData); // Reset to default if user logs out
-      setLoading(false);
-    }
-  }, [user, authLoading]);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const setData = useCallback((newData: FinancialData) => {
-    setDataState(newData);
-    if (user) {
-      const userDocRef = doc(db, "users", user.uid);
-      // Persist data to Firestore, merging it with existing document
-      setDoc(userDocRef, { financialData: newData }, { merge: true }).catch(error => {
-        console.error("Error saving financial data:", error);
-      });
+  // 2. Load Rates
+  useEffect(() => {
+    async function loadRates() {
+      try {
+        const liveData = await fetchLiveRates();
+        if (liveData && liveData.USD) setRates(liveData);
+      } catch (e) {}
     }
-  }, [user]);
+    loadRates();
+    const interval = setInterval(loadRates, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
+  // 3. Save Data
+  useEffect(() => {
+    if (isDataLoaded && typeof window !== 'undefined') {
+      localStorage.setItem("wealth_navigator_data_v3", JSON.stringify(data));
+    }
+  }, [data, isDataLoaded]);
+
+  // 4. Calculate Metrics
   const metrics = useMemo(() => {
     return calculateMetrics(data, currency, rates);
   }, [data, currency, rates]);
-  
-  const isLoading = authLoading || loading;
 
-  if (isLoading) {
+  // --- LOADING SCREEN ---
+  if (!isDataLoaded) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#020817] text-white">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading Financial Data...</p>
+        <div className="flex h-screen w-full items-center justify-center bg-[#020817] text-white">
+            <div className="flex flex-col items-center gap-4">
+                <Loader2 className="h-10 w-10 animate-spin text-emerald-500" />
+                <p className="text-sm text-muted-foreground animate-pulse">Accessing Secure Vault...</p>
+            </div>
         </div>
-      </div>
     );
   }
 
   return (
-    <FinancialDataContext.Provider value={{ data, setData, metrics, loading }}>
+    <FinancialDataContext.Provider 
+      value={{ data, setData, metrics, loading: !isDataLoaded, currency, setCurrency, rates }}
+    >
       {children}
     </FinancialDataContext.Provider>
   );

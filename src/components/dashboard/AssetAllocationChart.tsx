@@ -2,7 +2,9 @@
 "use client";
 
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from "recharts";
-import { useCurrency } from "@/hooks/use-currency";
+import { useCurrency } from "@/hooks/use-currency"; // Ensure this import path is correct
+
+// ... rest of the chart code ...
 
 interface AssetAllocationChartProps {
   assetsBreakdown: {

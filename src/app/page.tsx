@@ -43,7 +43,8 @@ import { PriceControlCard } from "@/components/dashboard/PriceControlCard";
 // Data & Context
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { emptyFinancialData } from "@/lib/data";
-import { fetchLiveRates, MarketRates, initialRates } from "@/lib/marketPrices";
+import { fetchLiveRates, initialRates } from "@/lib/marketPrices";
+// If you have a type definition for MarketRates, you can import it, otherwise we infer it.
 
 export default function DashboardPage() {
   const { data, setData, metrics } = useFinancialData();
@@ -52,12 +53,13 @@ export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   
   // State for Real-Time Market Data
-  const [marketRates, setMarketRates] = useState<MarketRates>(initialRates);
+  const [marketRates, setMarketRates] = useState(initialRates);
 
   useEffect(() => {
     setMounted(true);
-    // Fetch live market rates when page loads
-    fetchLiveRates().then(setMarketRates);
+    fetchLiveRates().then((rates) => {
+        if(rates) setMarketRates(rates);
+    });
   }, []);
 
   const handleClearData = () => {
@@ -70,6 +72,12 @@ export default function DashboardPage() {
   }
 
   if (!mounted) return null;
+
+  // Manual class string for the blur effect
+  // This avoids relying on external 'cn' utility if it's missing
+  const privacyClass = privacyMode 
+    ? "blur-xl select-none transition-all duration-500" 
+    : "transition-all duration-500";
 
   return (
     <div className="min-h-screen p-4 md:p-8 lg:p-12 space-y-8">
@@ -89,10 +97,10 @@ export default function DashboardPage() {
           <Button 
             variant="outline" 
             onClick={() => setPrivacyMode(!privacyMode)}
-            className="border-primary/20 hover:bg-primary/10"
+            className="border-primary/20 hover:bg-primary/10 w-36"
           >
             {privacyMode ? <Eye className="mr-2 h-4 w-4" /> : <EyeOff className="mr-2 h-4 w-4" />}
-            {privacyMode ? "Show Values" : "Hide Values"}
+            {privacyMode ? "Show" : "Hide Values"}
           </Button>
           
           <Button 
@@ -105,41 +113,30 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* --- LIVE MARKET TICKER (NEW) --- */}
+      {/* --- LIVE MARKET TICKER --- */}
       <div className="flex items-center gap-6 overflow-x-auto whitespace-nowrap text-xs font-mono text-muted-foreground py-3 px-4 border-y border-white/5 bg-black/20 rounded-lg no-scrollbar">
         <span className="flex items-center gap-2 text-primary font-bold">
           <Activity className="h-3 w-3" /> LIVE MARKET:
         </span>
-        
         <span className="flex items-center gap-1">
           <span className="text-slate-400">USD/EUR:</span>
           <span className="text-emerald-400 font-bold">{marketRates.EUR}</span>
         </span>
-
         <span className="w-px h-3 bg-white/10"></span>
-
-        <span className="flex items-center gap-1">
-          <span className="text-slate-400">USD/GBP:</span>
-          <span className="text-emerald-400 font-bold">{marketRates.GBP}</span>
-        </span>
-
-        <span className="w-px h-3 bg-white/10"></span>
-
         <span className="flex items-center gap-1">
           <span className="text-slate-400">GOLD (oz):</span>
-          <span className="text-amber-500 font-bold">${marketRates.Gold.toFixed(2)}</span>
+          <span className="text-amber-500 font-bold">${marketRates.Gold?.toFixed(2) || "0.00"}</span>
         </span>
-
         <span className="w-px h-3 bg-white/10"></span>
-
         <span className="flex items-center gap-1">
           <span className="text-slate-400">SILVER (oz):</span>
-          <span className="text-slate-300 font-bold">${marketRates.Silver.toFixed(2)}</span>
+          <span className="text-slate-300 font-bold">${marketRates.Silver?.toFixed(2) || "0.00"}</span>
         </span>
       </div>
 
       {/* --- KEY STATS ROW --- */}
-      <div className={`grid gap-6 md:grid-cols-2 lg:grid-cols-4 transition-all duration-500 ${privacyMode ? "blur-sm" : ""}`}>
+      {/* Applied Heavy Blur here */}
+      <div className={`grid gap-6 md:grid-cols-2 lg:grid-cols-4 ${privacyClass}`}>
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-purple-600 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-200"></div>
           <div className="relative h-full">
@@ -176,7 +173,9 @@ export default function DashboardPage() {
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Left Column: Operations */}
         <div className="lg:col-span-2 space-y-8">
-          <div className="grid gap-8 md:grid-cols-2">
+          
+          {/* Operations Row - Applied Blur */}
+          <div className={`grid gap-8 md:grid-cols-2 ${privacyClass}`}>
             <div className="glass-panel rounded-xl p-1">
                <UpcomingPayments />
             </div>
@@ -185,7 +184,7 @@ export default function DashboardPage() {
             </div>
           </div>
           
-          {/* Wide Chart Section */}
+          {/* Chart Section - Applied Blur */}
           <Card className="glass-panel border-0">
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -198,7 +197,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className={privacyMode ? "blur-md transition-all" : "transition-all"}>
+            <CardContent className={privacyClass}>
               <AssetAllocationChart assetsBreakdown={metrics.assets} totalAssets={metrics.totalAssets} />
             </CardContent>
           </Card>
@@ -210,7 +209,7 @@ export default function DashboardPage() {
             <PriceControlCard />
           </div>
 
-          {/* Danger Zone / Data Management */}
+          {/* Danger Zone */}
           <Card className="border-destructive/30 bg-destructive/5 shadow-none">
             <CardHeader>
               <div className="flex items-center gap-2">
