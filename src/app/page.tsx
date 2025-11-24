@@ -1,257 +1,139 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+import { useState, useEffect, useRef } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
-import { 
-  DollarSign, 
-  TrendingUp, 
-  TrendingDown, 
-  ArrowRightLeft, 
-  Trash2, 
-  Download, 
-  Eye, 
-  EyeOff, 
-  ShieldCheck,
-  PieChart,
-  Activity
-} from "lucide-react";
-
-// Components
+import { DollarSign, TrendingUp, TrendingDown, ArrowRightLeft, Trash2, Download, Upload, Eye, EyeOff, ShieldCheck, PieChart, Activity, LogOut } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { AssetAllocationChart } from "@/components/dashboard/AssetAllocationChart";
 import { UpcomingPayments } from "@/components/dashboard/UpcomingPayments";
 import { UpcomingRents } from "@/components/dashboard/UpcomingRents";
 import { PriceControlCard } from "@/components/dashboard/PriceControlCard";
-
-// Data & Context
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { emptyFinancialData } from "@/lib/data";
 import { fetchLiveRates, initialRates } from "@/lib/marketPrices";
-// If you have a type definition for MarketRates, you can import it, otherwise we infer it.
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function DashboardPage() {
   const { data, setData, metrics } = useFinancialData();
+  const { logout, user } = useAuth(); // Get Logout function
   const [isClearAlertOpen, setIsClearAlertOpen] = useState(false);
   const [privacyMode, setPrivacyMode] = useState(false);
   const [mounted, setMounted] = useState(false);
-  
-  // State for Real-Time Market Data
   const [marketRates, setMarketRates] = useState(initialRates);
+  const fileInputRef = useRef<HTMLInputElement>(null); // For Import
 
   useEffect(() => {
     setMounted(true);
-    fetchLiveRates().then((rates) => {
-        if(rates) setMarketRates(rates);
-    });
+    fetchLiveRates().then((rates) => { if(rates) setMarketRates(rates); });
   }, []);
 
-  const handleClearData = () => {
-    setData(emptyFinancialData);
-    setIsClearAlertOpen(false);
+  const handleClearData = () => { setData(emptyFinancialData); setIsClearAlertOpen(false); }
+
+  // --- EXPORT FUNCTION ---
+  const handleExport = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "wealth_navigator_backup.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
   }
 
-  const handleExport = () => {
-    alert("Generating PDF Report based on current assets...");
-  }
+  // --- IMPORT FUNCTION ---
+  const handleImportClick = () => fileInputRef.current?.click();
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        try {
+            const parsed = JSON.parse(event.target?.result as string);
+            if(parsed && parsed.assets) {
+                setData(parsed);
+                alert("Data imported successfully!");
+            } else {
+                alert("Invalid file format");
+            }
+        } catch(err) { alert("Error reading file"); }
+    };
+    reader.readAsText(file);
+  };
 
   if (!mounted) return null;
-
-  // Manual class string for the blur effect
-  // This avoids relying on external 'cn' utility if it's missing
-  const privacyClass = privacyMode 
-    ? "blur-xl select-none transition-all duration-500" 
-    : "transition-all duration-500";
+  const privacyClass = privacyMode ? "blur-xl select-none transition-all duration-500" : "transition-all duration-500";
 
   return (
     <div className="min-h-screen p-4 md:p-8 lg:p-12 space-y-8">
-      
+      {/* Hidden File Input for Import */}
+      <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".json" />
+
       {/* --- TOP HEADER --- */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card/30 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-lg">
+      <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-card/30 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-lg">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Wealth <span className="text-primary">Navigator</span>
           </h1>
-          <p className="text-muted-foreground mt-1">
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
+          <p className="text-muted-foreground mt-1">Welcome back, {user?.email}</p>
         </div>
         
-        <div className="flex gap-3">
-          <Button 
-            variant="outline" 
-            onClick={() => setPrivacyMode(!privacyMode)}
-            className="border-primary/20 hover:bg-primary/10 w-36"
-          >
+        <div className="flex flex-wrap gap-2">
+           <Button variant="outline" onClick={() => setPrivacyMode(!privacyMode)} className="border-primary/20 hover:bg-primary/10">
             {privacyMode ? <Eye className="mr-2 h-4 w-4" /> : <EyeOff className="mr-2 h-4 w-4" />}
-            {privacyMode ? "Show" : "Hide Values"}
+            {privacyMode ? "Show" : "Hide"}
           </Button>
           
-          <Button 
-            className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white border-0 shadow-lg shadow-orange-500/20"
-            onClick={handleExport}
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Export Report
+          <Button variant="outline" onClick={handleImportClick} className="border-white/10">
+            <Upload className="mr-2 h-4 w-4" /> Import
+          </Button>
+
+          <Button variant="default" onClick={handleExport} className="bg-emerald-600 hover:bg-emerald-700">
+            <Download className="mr-2 h-4 w-4" /> Export
+          </Button>
+
+          <Button variant="destructive" onClick={logout} className="ml-2">
+            <LogOut className="mr-2 h-4 w-4" /> Logout
           </Button>
         </div>
       </header>
 
       {/* --- LIVE MARKET TICKER --- */}
       <div className="flex items-center gap-6 overflow-x-auto whitespace-nowrap text-xs font-mono text-muted-foreground py-3 px-4 border-y border-white/5 bg-black/20 rounded-lg no-scrollbar">
-        <span className="flex items-center gap-2 text-primary font-bold">
-          <Activity className="h-3 w-3" /> LIVE MARKET:
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="text-slate-400">USD/EUR:</span>
-          <span className="text-emerald-400 font-bold">{marketRates.EUR}</span>
-        </span>
-        <span className="w-px h-3 bg-white/10"></span>
-        <span className="flex items-center gap-1">
-          <span className="text-slate-400">GOLD (oz):</span>
-          <span className="text-amber-500 font-bold">${marketRates.Gold?.toFixed(2) || "0.00"}</span>
-        </span>
-        <span className="w-px h-3 bg-white/10"></span>
-        <span className="flex items-center gap-1">
-          <span className="text-slate-400">SILVER (oz):</span>
-          <span className="text-slate-300 font-bold">${marketRates.Silver?.toFixed(2) || "0.00"}</span>
-        </span>
+        <span className="flex items-center gap-2 text-primary font-bold"><Activity className="h-3 w-3" /> LIVE:</span>
+        <span className="text-emerald-400">USD/EUR: {marketRates.EUR}</span>
+        <span className="text-amber-500">GOLD: ${marketRates.Gold?.toFixed(2)}</span>
+        <span className="text-slate-300">SILVER: ${marketRates.Silver?.toFixed(2)}</span>
       </div>
 
-      {/* --- KEY STATS ROW --- */}
-      {/* Applied Heavy Blur here */}
+      {/* --- STATS --- */}
       <div className={`grid gap-6 md:grid-cols-2 lg:grid-cols-4 ${privacyClass}`}>
-        <div className="relative group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-purple-600 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-200"></div>
-          <div className="relative h-full">
-            <StatCard 
-              title="Net Worth" 
-              value={metrics.netWorth} 
-              icon={<DollarSign className="text-amber-500 h-6 w-6" />} 
-              isCurrency={true} 
-            />
-          </div>
-        </div>
-
-        <StatCard 
-          title="Asset Value" 
-          value={metrics.totalAssets} 
-          icon={<TrendingUp className="text-emerald-500 h-6 w-6" />} 
-          isCurrency={true} 
-        />
-        <StatCard 
-          title="Liabilities" 
-          value={metrics.totalLiabilities} 
-          icon={<TrendingDown className="text-rose-500 h-6 w-6" />} 
-          isCurrency={true} 
-        />
-        <StatCard 
-          title="Net Cash Flow" 
-          value={metrics.netCashFlow} 
-          icon={<ArrowRightLeft className="text-blue-500 h-6 w-6" />} 
-          isCurrency={true} 
-        />
+        <StatCard title="Net Worth" value={metrics.netWorth} icon={<DollarSign className="text-amber-500" />} isCurrency={true} />
+        <StatCard title="Asset Value" value={metrics.totalAssets} icon={<TrendingUp className="text-emerald-500" />} isCurrency={true} />
+        <StatCard title="Liabilities" value={metrics.totalLiabilities} icon={<TrendingDown className="text-rose-500" />} isCurrency={true} />
+        <StatCard title="Net Cash Flow" value={metrics.netCashFlow} icon={<ArrowRightLeft className="text-blue-500" />} isCurrency={true} />
       </div>
 
-      {/* --- MAIN DASHBOARD GRID --- */}
+      {/* --- MAIN GRID --- */}
       <div className="grid gap-8 lg:grid-cols-3">
-        {/* Left Column: Operations */}
         <div className="lg:col-span-2 space-y-8">
-          
-          {/* Operations Row - Applied Blur */}
           <div className={`grid gap-8 md:grid-cols-2 ${privacyClass}`}>
-            <div className="glass-panel rounded-xl p-1">
-               <UpcomingPayments />
-            </div>
-            <div className="glass-panel rounded-xl p-1">
-               <UpcomingRents rents={data.assets.realEstate} />
-            </div>
+            <div className="glass-panel p-1 rounded-xl"><UpcomingPayments /></div>
+            <div className="glass-panel p-1 rounded-xl"><UpcomingRents rents={data.assets.realEstate} /></div>
           </div>
-          
-          {/* Chart Section - Applied Blur */}
-          <Card className="glass-panel border-0">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <PieChart className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle>Asset Allocation</CardTitle>
-                  <CardDescription>Distribution of wealth across categories</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className={privacyClass}>
-              <AssetAllocationChart assetsBreakdown={metrics.assets} totalAssets={metrics.totalAssets} />
-            </CardContent>
-          </Card>
+          <Card className="glass-panel border-0"><CardHeader><CardTitle>Asset Allocation</CardTitle></CardHeader><CardContent className={privacyClass}><AssetAllocationChart assetsBreakdown={metrics.assets} totalAssets={metrics.totalAssets} /></CardContent></Card>
         </div>
 
-        {/* Right Column: Controls & Utility */}
         <div className="space-y-8">
-          <div className="glass-panel rounded-xl p-1">
-            <PriceControlCard />
-          </div>
-
-          {/* Danger Zone */}
-          <Card className="border-destructive/30 bg-destructive/5 shadow-none">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                 <ShieldCheck className="h-5 w-5 text-destructive" />
-                 <CardTitle className="text-destructive">Data Management</CardTitle>
-              </div>
-              <CardDescription>
-                Manage your local session data.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button 
-                variant="outline" 
-                className="w-full border-destructive/50 text-destructive hover:bg-destructive hover:text-white transition-colors"
-                onClick={() => setIsClearAlertOpen(true)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Clear All Data
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="glass-panel p-1 rounded-xl"><PriceControlCard /></div>
+          <Card className="border-destructive/30 bg-destructive/5"><CardHeader><CardTitle className="text-destructive">Data Zone</CardTitle><CardDescription>Danger Zone</CardDescription></CardHeader><CardContent><Button variant="outline" className="w-full border-destructive/50 text-destructive" onClick={() => setIsClearAlertOpen(true)}><Trash2 className="mr-2 h-4 w-4" />Clear Data</Button></CardContent></Card>
         </div>
       </div>
 
-      {/* --- ALERTS --- */}
       <AlertDialog open={isClearAlertOpen} onOpenChange={setIsClearAlertOpen}>
-        <AlertDialogContent className="glass-panel border-white/10">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl">Factory Reset</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete all tracked assets, liabilities, and cash flow history from your local session.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="hover:bg-secondary">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleClearData} className="bg-destructive hover:bg-destructive/90 text-white">
-              Confirm Reset
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+        <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Reset?</AlertDialogTitle><AlertDialogDescription>Delete all data?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleClearData}>Confirm</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
       </AlertDialog>
-
     </div>
   );
 }
