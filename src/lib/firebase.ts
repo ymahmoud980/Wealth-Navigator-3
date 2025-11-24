@@ -1,20 +1,20 @@
-
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD235oKmaCDNC9sv1BetoBCn-5CyaNmmxk",
   authDomain: "web-archive-harvester.firebaseapp.com",
   projectId: "web-archive-harvester",
-  storageBucket: "web-archive-harvester.appspot.com",
+  storageBucket: "web-archive-harvester.firebasestorage.app",
   messagingSenderId: "536596374039",
-  appId: "1:536596374039:web:9521369c76f31a2cec2c25"
+  appId: "1:536596374039:web:ca213c8c6159457e123252"
 };
 
-// Initialize Firebase
+// Initialize Firebase (Prevent double initialization in Next.js)
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-const db = getFirestore(app);
 
-export { app, auth, db };
+// Export the services so other files can use them
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
+export const db = getFirestore(app);
