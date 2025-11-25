@@ -4,21 +4,20 @@ export interface MarketRates {
   USD: number;
   EUR: number;
   GBP: number;
-  Gold: number;
-  Silver: number;
+  Gold: number;   // Price per Ounce in USD
+  Silver: number; // Price per Ounce in USD
   TRY: number;
   EGP: number;
   KWD: number;
   [key: string]: number;
 }
 
-// 1. Base Fallback (Nov 2025)
-// These are only used if the API fails or doesn't provide Metal data
+// Fallback values (Updated to your observed values)
 export const initialRates: MarketRates = {
   USD: 1,
   EUR: 0.95,
   GBP: 0.82,
-  Gold: 4121.05, 
+  Gold: 4130.00,  // Your observed price
   Silver: 50.50,
   TRY: 45.0,
   EGP: 65.0,
@@ -27,29 +26,38 @@ export const initialRates: MarketRates = {
 
 export async function fetchLiveRates(): Promise<MarketRates> {
   try {
-    // 2. Fetch Real Data
-    // We add a timestamp (?t=...) to ensure the browser doesn't show you old cached data
-    const res = await fetch(`https://api.exchangerate-api.com/v4/latest/USD?t=${new Date().getTime()}`);
-    
-    if (!res.ok) throw new Error("API Failed");
-    
-    const data = await res.json();
-    const rates = data.rates;
+    // Fetch Data from TWO sources in parallel
+    // 1. Currencies (ExchangeRate-API)
+    // 2. Metals (CoinGecko - tracks Gold/Silver spot price via PAXG/XAG tokens)
+    const [currencyRes, metalRes] = await Promise.all([
+      fetch(`https://api.exchangerate-api.com/v4/latest/USD?t=${Date.now()}`),
+      fetch(`https://api.coingecko.com/api/v3/simple/price?ids=pax-gold,kinesis-silver&vs_currencies=usd&t=${Date.now()}`)
+    ]);
 
-    // 3. Calculate Real Prices (No Simulation)
-    // If API gives Gold (XAU), calculate price. If not, keep fallback.
-    const realGold = rates.XAU ? (1 / rates.XAU) : initialRates.Gold;
-    const realSilver = rates.XAG ? (1 / rates.XAG) : initialRates.Silver;
+    const currencyData = await currencyRes.json();
+    const metalData = await metalRes.json();
+
+    // Extract Rates
+    const rates = currencyData.rates || {};
+
+    // Extract Metals
+    // PAXG (Pax Gold) tracks 1 oz of Gold
+    // KAG (Kinesis Silver) tracks 1 oz of Silver
+    // We use these because they provide free, live JSON data for commodities
+    const realGold = metalData["pax-gold"]?.usd || initialRates.Gold;
+    const realSilver = metalData["kinesis-silver"]?.usd || initialRates.Silver;
 
     return {
-      ...initialRates, // Keep defaults for missing currencies
-      ...rates,        // Overwrite with live API data
+      ...initialRates, // Safety defaults
+      ...rates,        // Live Currencies
+      
+      // Live Metal Prices
       Gold: realGold,  
       Silver: realSilver
     };
 
   } catch (error) {
-    console.warn("Market Data Offline: Using backup rates.");
+    console.warn("Market API Error, using fallbacks:", error);
     return initialRates;
   }
 }
