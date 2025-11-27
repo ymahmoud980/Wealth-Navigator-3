@@ -4,14 +4,13 @@
 
 @layer base {
   :root {
-    /* Light Mode - Professional Slate & Blue */
     --background: 210 40% 98%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 221 83% 53%; /* Royal Blue */
+    --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222 47% 11%;
@@ -28,18 +27,17 @@
   }
 
   .dark {
-    /* Dark Mode - "FinTech Pro" Theme (Navy, Gold, Emerald) */
+    /* DARK MODE - "FinTech Pro" Theme (Navy, Gold, Emerald) */
     --background: 224 71% 4%; /* Deepest Navy */
     --foreground: 210 40% 98%;
     
-    /* Glass effect for cards */
     --card: 222 47% 11%; 
     --card-foreground: 210 40% 98%;
     
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
     
-    --primary: 45 93% 47%; /* Gold - Wealth Indicator */
+    --primary: 45 93% 47%; /* Gold */
     --primary-foreground: 222 47% 11%;
     
     --secondary: 217 33% 17%;
@@ -48,7 +46,7 @@
     --muted: 217 33% 17%;
     --muted-foreground: 215 20% 65%;
     
-    --accent: 171 77% 64%; /* Electric Teal - Growth */
+    --accent: 171 77% 64%; /* Electric Teal */
     --accent-foreground: 222 47% 11%;
     
     --destructive: 0 62% 30%;
@@ -75,7 +73,6 @@
   }
 }
 
-/* Custom Utilities for the Upgrade */
 @layer utilities {
   .glass-panel {
     @apply bg-card/40 backdrop-blur-xl border-white/10 shadow-xl;
@@ -87,5 +84,13 @@
   
   .text-gradient-blue {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400;
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

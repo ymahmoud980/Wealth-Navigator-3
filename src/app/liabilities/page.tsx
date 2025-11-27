@@ -9,16 +9,7 @@ import { useFinancialData } from "@/contexts/FinancialDataContext"
 import type { FinancialData, Loan, Installment } from "@/lib/types";
 import { LiabilityUploader } from "@/components/liabilities/LiabilityUploader";
 import { Trash2, Landmark, Building, CalendarClock, AlertCircle } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { AddLiabilityDialog } from "@/components/liabilities/AddLiabilityDialog";
 import { AddInstallmentDialog } from "@/components/liabilities/AddInstallmentDialog";
 import { format, isValid, parseISO, addMonths, addYears } from "date-fns";
@@ -125,7 +116,7 @@ export default function LiabilitiesPage() {
   const { loans, installments } = currentData.liabilities;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-20">
       
       {/* Header */}
       <div className="flex justify-between items-center glass-panel p-6 rounded-xl">

@@ -7,21 +7,11 @@ import { Button } from "@/components/ui/button"
 import { useFinancialData } from "@/contexts/FinancialDataContext"
 import type { FinancialData } from "@/lib/types";
 import { AddAssetDialog } from "@/components/assets/AddAssetDialog";
-import { Trash2, Wallet, Gem, Scale, Package, Building2, Coins, ArrowUpRight } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+import { Trash2, Wallet, Gem, Scale, Package, Building2, Coins } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
-// Helper for inputs to look good on dark backgrounds
 const GlassInput = (props: any) => (
   <Input 
     {...props} 
@@ -75,7 +65,6 @@ export default function AssetsPage() {
 
  const handleAddAsset = (newAsset: any, type: string) => {
     const updatedData = JSON.parse(JSON.stringify(data));
-    // (Logic kept exactly as your original code)
     if (type === 'gold' || type === 'silver' || type === 'cash') {
         const assetKey = type as 'gold' | 'silver' | 'cash';
         const existingAsset = updatedData.assets[assetKey].find((a: any) => a.location === newAsset.location);
@@ -140,7 +129,7 @@ export default function AssetsPage() {
   const { installments } = currentData.liabilities;
   
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-20">
       
       {/* Header Section */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 glass-panel p-6 rounded-xl">
