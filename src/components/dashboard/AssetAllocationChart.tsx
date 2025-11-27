@@ -1,13 +1,11 @@
-// Final V3 Chart Colors
 "use client";
 
+import { useState, useEffect } from "react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from "recharts";
-import { useCurrency } from "@/hooks/use-currency"; // Ensure this import path is correct
-
-// ... rest of the chart code ...
+import { useCurrency } from "@/hooks/use-currency";
 
 interface AssetAllocationChartProps {
-  assetsBreakdown: {
+  assetsBreakdown?: { // Made optional to prevent crash
     existingRealEstate: number;
     offPlanRealEstate: number;
     cash: number;
@@ -15,54 +13,44 @@ interface AssetAllocationChartProps {
     silver: number;
     other: number;
   };
-  totalAssets: number;
+  totalAssets?: number; // Made optional
 }
 
-export function AssetAllocationChart({ assetsBreakdown, totalAssets }: AssetAllocationChartProps) {
+export function AssetAllocationChart({ assetsBreakdown, totalAssets = 0 }: AssetAllocationChartProps) {
   const { format } = useCurrency();
+  const [isMounted, setIsMounted] = useState(false);
 
-  // 1. Prepare Data with Explicit Vibrant Colors
+  // Prevent SSR Hydration Mismatch (Recharts often crashes on first load without this)
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return <div className="h-[350px] w-full flex items-center justify-center text-muted-foreground">Loading Chart...</div>;
+
+  // SAFETY CHECK: If data is missing, don't try to render the chart
+  if (!assetsBreakdown) {
+    return <div className="h-[350px] flex items-center justify-center text-muted-foreground">No data available</div>;
+  }
+
   const data = [
-    { 
-      name: "Existing Real Estate", 
-      value: assetsBreakdown.existingRealEstate, 
-      color: "#10b981", // Emerald
-    },
-    { 
-      name: "Off-Plan Real Estate", 
-      value: assetsBreakdown.offPlanRealEstate, 
-      color: "#34d399", // Teal
-    },
-    { 
-      name: "Gold", 
-      value: assetsBreakdown.gold, 
-      color: "#fbbf24", // Amber
-    },
-    { 
-      name: "Silver", 
-      value: assetsBreakdown.silver, 
-      color: "#94a3b8", // Slate
-    },
-    { 
-      name: "Cash", 
-      value: assetsBreakdown.cash, 
-      color: "#3b82f6", // Blue
-    },
-    { 
-      name: "Other", 
-      value: assetsBreakdown.other, 
-      color: "#a855f7", // Purple
-    },
-  ].filter(item => item.value > 0); 
+    { name: "Existing Real Estate", value: assetsBreakdown.existingRealEstate || 0, color: "#10b981" },
+    { name: "Off-Plan Real Estate", value: assetsBreakdown.offPlanRealEstate || 0, color: "#34d399" },
+    { name: "Gold", value: assetsBreakdown.gold || 0, color: "#fbbf24" },
+    { name: "Silver", value: assetsBreakdown.silver || 0, color: "#94a3b8" },
+    { name: "Cash", value: assetsBreakdown.cash || 0, color: "#3b82f6" },
+    { name: "Other", value: assetsBreakdown.other || 0, color: "#a855f7" },
+  ].filter(item => item.value > 0);
 
-  // Custom Glass Tooltip
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  if (data.length === 0) {
+    return <div className="h-[350px] flex items-center justify-center text-muted-foreground">No assets to display</div>;
+  }
+
+  const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const item = payload[0].payload;
       const percentage = totalAssets > 0 ? ((item.value / totalAssets) * 100).toFixed(1) : "0";
-      
       return (
-        <div className="bg-[#0f172a]/90 backdrop-blur-md border border-white/10 p-3 rounded-xl shadow-xl">
+        <div className="bg-[#0f172a]/95 backdrop-blur-md border border-white/10 p-3 rounded-xl shadow-xl">
           <p className="font-bold text-white mb-1">{item.name}</p>
           <p className="text-emerald-400 font-mono text-lg">{format(item.value)}</p>
           <p className="text-xs text-muted-foreground mt-1">{percentage}% of Net Worth</p>
@@ -72,32 +60,12 @@ export function AssetAllocationChart({ assetsBreakdown, totalAssets }: AssetAllo
     return null;
   };
 
-  if (totalAssets === 0) {
-    return (
-      <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-        No asset data available yet.
-      </div>
-    );
-  }
-
   return (
     <div className="h-[350px] w-full mt-4">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          layout="vertical"
-          data={data}
-          margin={{ top: 0, right: 30, left: 20, bottom: 0 }}
-          barSize={32}
-        >
+        <BarChart layout="vertical" data={data} margin={{ top: 0, right: 30, left: 20, bottom: 0 }} barSize={32}>
           <XAxis type="number" hide />
-          <YAxis 
-            dataKey="name" 
-            type="category" 
-            width={140}
-            tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 500 }} 
-            axisLine={false}
-            tickLine={false}
-          />
+          <YAxis dataKey="name" type="category" width={140} tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
           <Bar dataKey="value" radius={[0, 6, 6, 0]}>
             {data.map((entry, index) => (

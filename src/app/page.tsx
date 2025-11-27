@@ -16,29 +16,36 @@ import { fetchLiveRates, initialRates, MarketRates } from "@/lib/marketPrices";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function DashboardPage() {
-  // 1. Safe Destructuring with Defaults
+  // 1. Safe Context Access
   const financialContext = useFinancialData();
   const authContext = useAuth();
   
-  // Safety: If context is missing (rare), prevent crash
+  // 2. Safe Fallbacks (Prevents "Cannot read property of undefined" crash)
   const data = financialContext?.data || emptyFinancialData;
   const setData = financialContext?.setData || (() => {});
   const metrics = financialContext?.metrics || { netWorth: 0, totalAssets: 0, totalLiabilities: 0, netCashFlow: 0, assets: { existingRealEstate: 0, offPlanRealEstate: 0, cash: 0, gold: 0, silver: 0, other: 0 } };
   const user = authContext?.user;
-  const logout = authContext?.logout || (() => {});
-
+  
   const [isClearAlertOpen, setIsClearAlertOpen] = useState(false);
   const [privacyMode, setPrivacyMode] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [marketRates, setMarketRates] = useState<MarketRates>(initialRates);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 3. Load Data Safely
   useEffect(() => {
     setMounted(true);
-    fetchLiveRates().then((rates) => { 
-        // Safety check before setting state
-        if(rates && typeof rates === 'object') setMarketRates(rates); 
-    });
+    const loadRates = async () => {
+      try {
+        const rates = await fetchLiveRates();
+        if(rates && typeof rates === 'object') {
+          setMarketRates(rates);
+        }
+      } catch (e) {
+        console.error("Failed to load rates", e);
+      }
+    };
+    loadRates();
   }, []);
 
   const handleClearData = () => { setData(emptyFinancialData); setIsClearAlertOpen(false); }
@@ -54,6 +61,7 @@ export default function DashboardPage() {
   }
 
   const handleImportClick = () => fileInputRef.current?.click();
+  
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -72,42 +80,43 @@ export default function DashboardPage() {
     reader.readAsText(file);
   };
 
-  // Prevent Hydration Error (Server vs Client)
+  // 4. Prevent Hydration Error
   if (!mounted) return null;
 
   const privacyClass = privacyMode ? "blur-xl select-none transition-all duration-500" : "transition-all duration-500";
 
-  // --- SAFE USER DATA ---
-  // We use Optional Chaining (?.) everywhere to prevent crashes if user is loading
+  // --- SAFE DATA PARSING (CRASH PREVENTION) ---
+  
+  // User Info
   const emailName = user?.email ? user.email.split('@')[0] : "Investor";
   const displayName = user?.displayName || emailName;
   const userImage = user?.photoURL || `https://api.dicebear.com/9.x/avataaars/svg?seed=${user?.email || 'guest'}`;
   
-  // Safe Date Parsing
   let lastLogin = "Just now";
   try {
       const meta = (user as any)?.metadata;
       if (meta?.lastSignInTime) {
           lastLogin = new Date(meta.lastSignInTime).toLocaleString();
       }
-  } catch (e) {
-      // Ignore date errors
-  }
+  } catch (e) {}
 
-  // Safe Market Data (Prevent crash if Gold is undefined)
-  const safeGold = marketRates?.Gold ? marketRates.Gold.toFixed(2) : "0.00";
-  const safeSilver = marketRates?.Silver ? marketRates.Silver.toFixed(2) : "0.00";
-  const safeEur = marketRates?.EUR || 0.92;
+  // Market Rates (The part that likely caused the crash)
+  const safeEur = marketRates?.EUR || 0.95;
+  // Explicitly check for null/undefined before calling toFixed
+  const safeGold = (marketRates?.Gold !== undefined && marketRates?.Gold !== null) 
+    ? marketRates.Gold.toFixed(2) 
+    : "Loading...";
+  const safeSilver = (marketRates?.Silver !== undefined && marketRates?.Silver !== null) 
+    ? marketRates.Silver.toFixed(2) 
+    : "Loading...";
 
   return (
     <div className="min-h-screen p-4 md:p-8 lg:p-12 space-y-8">
       <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".json" />
 
-      {/* --- RICH HEADER --- */}
+      {/* --- HEADER --- */}
       <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-card/30 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-lg">
         <div className="flex items-center gap-4">
-          
-          {/* AVATAR BOX */}
           <div className="h-14 w-14 rounded-full overflow-hidden border-2 border-primary/50 shadow-[0_0_15px_rgba(var(--primary),0.3)] bg-slate-800">
              <img src={userImage} alt="User" className="h-full w-full object-cover" />
           </div>
@@ -146,7 +155,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* --- LIVE TICKER (CRASH PROOF) --- */}
+      {/* --- LIVE TICKER --- */}
       <div className="flex items-center gap-6 overflow-x-auto whitespace-nowrap text-xs font-mono text-muted-foreground py-3 px-4 border-y border-white/5 bg-black/20 rounded-lg no-scrollbar">
         <span className="flex items-center gap-2 text-primary font-bold"><Activity className="h-3 w-3" /> LIVE:</span>
         <span className="text-emerald-400">USD/EUR: {safeEur}</span>
@@ -162,7 +171,7 @@ export default function DashboardPage() {
         <StatCard title="Net Cash Flow" value={metrics?.netCashFlow || 0} icon={<ArrowRightLeft className="text-blue-500" />} isCurrency={true} />
       </div>
 
-      {/* --- CONTENT --- */}
+      {/* --- MAIN CONTENT --- */}
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">
           <div className={`grid gap-8 md:grid-cols-2 ${privacyClass}`}>
