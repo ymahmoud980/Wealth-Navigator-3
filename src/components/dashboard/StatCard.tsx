@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 interface StatCardProps {
   title: string;
-  value: any; // Accept any type safely
+  value: any; // Allow any input type to prevent TypeErrors
   icon: ReactNode;
   isCurrency?: boolean;
 }
@@ -14,13 +14,13 @@ interface StatCardProps {
 export function StatCard({ title, value, icon, isCurrency = false }: StatCardProps) {
   const { format } = useCurrency();
 
-  // Safety: Ensure we have a number
+  // SAFETY: Convert whatever we get to a number, default to 0 if NaN
   const safeValue = Number(value) || 0;
 
   const getColor = () => {
-    if (title === 'Liabilities') return 'text-rose-400 drop-shadow-md';
-    if (title.includes('Cash Flow')) return safeValue >= 0 ? 'text-emerald-400 drop-shadow-md' : 'text-rose-400 drop-shadow-md';
-    if (title === 'Net Worth') return 'text-amber-400 drop-shadow-md';
+    if (title === 'Liabilities') return 'text-rose-400';
+    if (title.includes('Cash Flow')) return safeValue >= 0 ? 'text-emerald-400' : 'text-rose-400';
+    if (title === 'Net Worth') return 'text-amber-400';
     return 'text-foreground';
   };
 
