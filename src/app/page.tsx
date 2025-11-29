@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
-import { DollarSign, TrendingUp, TrendingDown, ArrowRightLeft, Trash2, Download, Upload, Eye, EyeOff, ShieldCheck, PieChart, Activity, LogOut } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, ArrowRightLeft, Trash2, Download, Upload, Eye, EyeOff, ShieldCheck, PieChart, Activity, LogOut, Globe } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { AssetAllocationChart } from "@/components/dashboard/AssetAllocationChart";
 import { UpcomingPayments } from "@/components/dashboard/UpcomingPayments";
@@ -19,8 +19,11 @@ export default function DashboardPage() {
   const financialContext = useFinancialData();
   const authContext = useAuth();
   
+  // Safe Fallbacks
   const data = financialContext?.data || emptyFinancialData;
   const setData = financialContext?.setData || (() => {});
+  const currency = financialContext?.currency || "USD";
+  const setCurrency = financialContext?.setCurrency || (() => {});
   const metrics = financialContext?.metrics || { netWorth: 0, totalAssets: 0, totalLiabilities: 0, netCashFlow: 0, assets: { existingRealEstate: 0, offPlanRealEstate: 0, cash: 0, gold: 0, silver: 0, other: 0 } };
   const user = authContext?.user;
   
@@ -68,11 +71,9 @@ export default function DashboardPage() {
     reader.readAsText(file);
   };
 
-  // --- CRITICAL STABILITY CHECK ---
   if (!mounted) return null;
 
   const privacyClass = privacyMode ? "blur-xl select-none transition-all duration-500" : "transition-all duration-500";
-
   const userImage = user?.photoURL || `https://api.dicebear.com/9.x/avataaars/svg?seed=${user?.email || 'guest'}`;
   let lastLogin = "Just now";
   try {
@@ -96,9 +97,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                    Wealth <span className="text-primary">Navigator</span>
-                </h1>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">Wealth <span className="text-primary">Navigator</span></h1>
                 <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 uppercase tracking-widest font-bold">PRO INVESTOR</span>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-muted-foreground mt-1">
@@ -108,7 +107,29 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+        
         <div className="flex flex-wrap items-center gap-2">
+           {/* CURRENCY SWITCHER */}
+           <div className="relative group mr-2">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <Globe className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <select 
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                className="h-9 pl-9 pr-4 rounded-md border border-white/10 bg-black/20 text-sm focus:ring-primary focus:border-primary block w-full appearance-none cursor-pointer hover:bg-white/5 transition-colors"
+              >
+                <option value="USD">🇺🇸 USD ($)</option>
+                <option value="KWD">🇰🇼 KWD (KD)</option>
+                <option value="EGP">🇪🇬 EGP (E£)</option>
+                <option value="TRY">🇹🇷 TRY (₺)</option>
+                <option value="EUR">🇪🇺 EUR (€)</option>
+                <option value="GBP">🇬🇧 GBP (£)</option>
+                <option value="AED">🇦🇪 AED (Dh)</option>
+                <option value="SAR">🇸🇦 SAR (SR)</option>
+              </select>
+           </div>
+
            <Button variant="outline" onClick={() => setPrivacyMode(!privacyMode)} className="border-primary/20 hover:bg-primary/10 h-9 text-xs">
             {privacyMode ? <Eye className="mr-2 h-3 w-3" /> : <EyeOff className="mr-2 h-3 w-3" />} {privacyMode ? "Show" : "Hide"}
           </Button>
